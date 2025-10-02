@@ -1,0 +1,10 @@
+{
+  "email": "john.doe@company.com",
+  "password": "ITUser123!",
+  "confirmPassword": "ITUser123!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "department": "Information Technology",
+  "position": "Software Developer",
+  "companyId": 1
+}

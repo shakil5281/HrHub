@@ -7,18 +7,20 @@ namespace HrHubAPI.Models
         [Key]
         public int Id { get; set; }
 
+        // Company ID (could be a custom company identifier)
+        [MaxLength(50)]
+        public string? CompanyId { get; set; }
+
         [Required]
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
 
+        // Bangla version of company name - should use SutonnyMJ font for display
+        [MaxLength(200)]
+        public string? CompanyNameBangla { get; set; }
+
         [MaxLength(500)]
         public string? Description { get; set; }
-
-        [MaxLength(200)]
-        public string? Industry { get; set; }
-
-        [MaxLength(100)]
-        public string? Website { get; set; }
 
         [MaxLength(20)]
         public string? Phone { get; set; }
@@ -29,6 +31,10 @@ namespace HrHubAPI.Models
         // Address Information
         [MaxLength(500)]
         public string? Address { get; set; }
+
+        // Bangla version of address - should use SutonnyMJ font for display
+        [MaxLength(500)]
+        public string? AddressBangla { get; set; }
 
         [MaxLength(100)]
         public string? City { get; set; }
@@ -42,20 +48,13 @@ namespace HrHubAPI.Models
         [MaxLength(100)]
         public string? Country { get; set; }
 
-        // Company Details
-        [MaxLength(50)]
-        public string? RegistrationNumber { get; set; }
-
-        [MaxLength(50)]
-        public string? TaxId { get; set; }
-
-        public DateTime? EstablishedDate { get; set; }
-
-        public int? EmployeeCount { get; set; }
-
         // Logo/Image
         [MaxLength(500)]
         public string? LogoUrl { get; set; }
+
+        // Authorized Signature
+        [MaxLength(500)]
+        public string? AuthorizedSignature { get; set; }
 
         // Audit Fields
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

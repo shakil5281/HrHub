@@ -65,9 +65,9 @@ namespace HrHubAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b4f9f22e-8047-41f5-9fb0-1ded3ac2ee3d",
-                            ConcurrencyStamp = "e3001dc8-7906-44e7-9426-8f9a30209a92",
-                            CreatedAt = new DateTime(2025, 10, 1, 17, 20, 4, 449, DateTimeKind.Utc).AddTicks(9902),
+                            Id = "4ba89663-eaf3-4291-9cb4-888f4ec65efd",
+                            ConcurrencyStamp = "2dff9e89-1a39-4275-9d9c-0b054dbd7c4f",
+                            CreatedAt = new DateTime(2025, 10, 2, 8, 53, 26, 441, DateTimeKind.Utc).AddTicks(3529),
                             Description = "System Administrator with full access",
                             IsActive = true,
                             Name = "Admin",
@@ -75,9 +75,9 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "89d416fc-1607-4413-903d-2f6d9b9dac28",
-                            ConcurrencyStamp = "a240692c-85f1-41aa-9aee-ea1d5e8d093e",
-                            CreatedAt = new DateTime(2025, 10, 1, 17, 20, 4, 449, DateTimeKind.Utc).AddTicks(9911),
+                            Id = "5e349878-47a5-4e21-9dbc-cd224d566d54",
+                            ConcurrencyStamp = "e92af005-b52c-4c78-acd1-2cd04a26879d",
+                            CreatedAt = new DateTime(2025, 10, 2, 8, 53, 26, 441, DateTimeKind.Utc).AddTicks(3539),
                             Description = "Manager with limited administrative access",
                             IsActive = true,
                             Name = "Manager",
@@ -85,13 +85,43 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "2ba2c5d7-6965-4d57-9aca-9e8e91c08ec8",
-                            ConcurrencyStamp = "d3f2cd8d-fdfb-4083-a725-d4a61c048d69",
-                            CreatedAt = new DateTime(2025, 10, 1, 17, 20, 4, 449, DateTimeKind.Utc).AddTicks(9927),
+                            Id = "024c6577-5de2-4b99-804b-ef1262152f08",
+                            ConcurrencyStamp = "a9a51418-7dfd-4721-b8b2-1e8d50ffa422",
+                            CreatedAt = new DateTime(2025, 10, 2, 8, 53, 26, 441, DateTimeKind.Utc).AddTicks(3545),
                             Description = "Regular employee with basic access",
                             IsActive = true,
                             Name = "Employee",
                             NormalizedName = "EMPLOYEE"
+                        },
+                        new
+                        {
+                            Id = "7b772762-145a-43b1-b16d-f4ed31202147",
+                            ConcurrencyStamp = "5323db40-e380-459a-9158-e372c9468b08",
+                            CreatedAt = new DateTime(2025, 10, 2, 8, 53, 26, 441, DateTimeKind.Utc).AddTicks(3636),
+                            Description = "IT personnel with technical system access and user management capabilities",
+                            IsActive = true,
+                            Name = "IT",
+                            NormalizedName = "IT"
+                        },
+                        new
+                        {
+                            Id = "773bd333-537f-4185-a5dd-f3d828dabf73",
+                            ConcurrencyStamp = "a05548b6-1efc-4364-bade-e38e5ab73692",
+                            CreatedAt = new DateTime(2025, 10, 2, 8, 53, 26, 441, DateTimeKind.Utc).AddTicks(3642),
+                            Description = "HR personnel with employee management and company-wide HR operations access",
+                            IsActive = true,
+                            Name = "HR",
+                            NormalizedName = "HR"
+                        },
+                        new
+                        {
+                            Id = "3ba20610-5478-4cb3-8b6e-9907d572d9e2",
+                            ConcurrencyStamp = "cfc65713-c246-4dab-a946-bdfafe94bed5",
+                            CreatedAt = new DateTime(2025, 10, 2, 8, 53, 26, 441, DateTimeKind.Utc).AddTicks(3650),
+                            Description = "Senior HR personnel with advanced HR management capabilities and strategic oversight",
+                            IsActive = true,
+                            Name = "HR Manager",
+                            NormalizedName = "HR MANAGER"
                         });
                 });
 
@@ -211,9 +241,25 @@ namespace HrHubAPI.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("AddressBangla")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("AuthorizedSignature")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("City")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CompanyId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CompanyNameBangla")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Country")
                         .HasMaxLength(100)
@@ -236,16 +282,6 @@ namespace HrHubAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("EmployeeCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("EstablishedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Industry")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -266,17 +302,9 @@ namespace HrHubAPI.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("RegistrationNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("State")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TaxId")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -285,10 +313,6 @@ namespace HrHubAPI.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("Website")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("IsActive");
@@ -296,6 +320,94 @@ namespace HrHubAPI.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameBangla")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.UserCompany", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("AssignedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "CompanyId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserCompany_UserId_CompanyId");
+
+                    b.ToTable("UserCompanies");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -431,6 +543,25 @@ namespace HrHubAPI.Migrations
                         .HasForeignKey("CompanyId");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.UserCompany", b =>
+                {
+                    b.HasOne("HrHubAPI.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HrHubAPI.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

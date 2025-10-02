@@ -1,0 +1,19 @@
+{
+  "name": "Ahmed Rahman Khan",
+  "nameBangla": "আহমেদ রহমান খান",
+  "nidNo": "1987654321098",
+  "fatherName": "Mohammad Rahman Khan",
+  "motherName": "Fatima Rahman",
+  "fatherNameBangla": "মোহাম্মদ রহমান খান",
+  "motherNameBangla": "ফাতিমা রহমান",
+  "dateOfBirth": "1985-03-20T00:00:00Z",
+  "address": "House 67, Road 15, Gulshan-2, Dhaka-1212, Bangladesh",
+  "joiningDate": "2024-02-01T00:00:00Z",
+  "departmentId": 1,
+  "sectionId": 1,
+  "designationId": 2,
+  "grossSalary": 85000.00,
+  "basicSalary": 50000.00,
+  "bankAccountNo": "ACC-2024-001234",
+  "isActive": true
+}

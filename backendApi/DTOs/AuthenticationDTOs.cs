@@ -102,6 +102,34 @@ namespace HrHubAPI.DTOs
         public int CompanyId { get; set; }
     }
 
+    public class TokenValidationDto
+    {
+        [Required]
+        public string Token { get; set; } = string.Empty;
+    }
+
+    public class TokenValidationResponseDto
+    {
+        public bool IsValid { get; set; }
+        public string? UserId { get; set; }
+        public string? Email { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public List<string> Roles { get; set; } = new();
+        public DateTime? ExpirationDate { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+
+    public class AssignMultipleCompaniesToUserDto
+    {
+        [Required]
+        public string UserId { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(1, ErrorMessage = "At least one company must be specified")]
+        public List<int> CompanyIds { get; set; } = new();
+    }
+
     public class ApiResponse<T>
     {
         public bool Success { get; set; }

@@ -95,5 +95,65 @@ namespace HrHubAPI.Services
 
             return principal;
         }
+
+        public async Task<bool> ValidateTokenAsync(string token)
+        {
+            try
+            {
+                var principal = GetPrincipalFromToken(token);
+                if (principal == null)
+                    return false;
+
+                // Check if user still exists and is active
+                var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return false;
+
+                var user = await _userManager.FindByIdAsync(userId);
+                return user != null && user.IsActive;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromToken(string token)
+        {
+            try
+            {
+                var jwtSettings = _configuration.GetSection("JwtSettings");
+                var secretKey = jwtSettings["SecretKey"];
+                var issuer = jwtSettings["Issuer"];
+                var audience = jwtSettings["Audience"];
+
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+                if (securityToken is not JwtSecurityToken jwtSecurityToken || 
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return null;
+                }
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

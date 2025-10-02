@@ -39,18 +39,82 @@
       ],
       "restrictions": "Can only access their own data",
       "defaultUser": "None - must be assigned by Admin"
+    },
+    {
+      "name": "IT",
+      "description": "IT personnel with technical system access and user management capabilities",
+      "permissions": [
+        "Manage system settings and configurations",
+        "View all users across all companies",
+        "Reset user passwords",
+        "Manage user accounts (create, update, deactivate)",
+        "View system logs and reports",
+        "Backup and restore operations",
+        "Technical support and troubleshooting",
+        "Access all API endpoints for technical operations"
+      ],
+      "restrictions": "Cannot delete companies or modify financial data",
+      "defaultUser": "None - must be assigned by Admin"
+    },
+    {
+      "name": "HR",
+      "description": "HR personnel with employee management and company-wide HR operations access",
+      "permissions": [
+        "View all employees in their company",
+        "Create and update employee profiles",
+        "Manage employee departments and positions",
+        "View and generate HR reports",
+        "Manage employee onboarding and offboarding",
+        "Access employee performance data",
+        "Manage leave requests and approvals",
+        "View company organizational structure"
+      ],
+      "restrictions": "Limited to their assigned company's HR data only",
+      "defaultUser": "None - must be assigned by Admin"
+    },
+    {
+      "name": "HR Manager",
+      "description": "Senior HR personnel with advanced HR management capabilities and strategic oversight",
+      "permissions": [
+        "All HR permissions",
+        "Manage HR staff and assign HR roles",
+        "Create and modify HR policies",
+        "Access strategic HR analytics and insights",
+        "Manage compensation and benefits data",
+        "Approve major HR decisions and changes",
+        "Cross-departmental employee management",
+        "Budget planning for HR operations",
+        "Manage company-wide HR initiatives"
+      ],
+      "restrictions": "Limited to their assigned company, cannot manage IT or Admin users",
+      "defaultUser": "None - must be assigned by Admin"
     }
   ],
   "roleHierarchy": {
     "Admin": {
-      "level": 3,
-      "canManage": ["Manager", "Employee"],
+      "level": 5,
+      "canManage": ["IT", "HR Manager", "Manager", "HR", "Employee"],
       "description": "Highest level - can manage all other roles"
+    },
+    "IT": {
+      "level": 4,
+      "canManage": ["Manager", "HR", "Employee"],
+      "description": "Technical level - can manage users but not other IT or HR Managers"
+    },
+    "HR Manager": {
+      "level": 3,
+      "canManage": ["Manager", "HR", "Employee"],
+      "description": "Senior HR level - can manage HR staff and employees in their company"
     },
     "Manager": {
       "level": 2,
       "canManage": ["Employee"],
       "description": "Mid level - can manage employees in their company"
+    },
+    "HR": {
+      "level": 2,
+      "canManage": ["Employee"],
+      "description": "HR level - can manage employee HR data in their company"
     },
     "Employee": {
       "level": 1,
@@ -61,17 +125,26 @@
   "accessControl": {
     "companyAccess": {
       "Admin": "All companies",
+      "IT": "All companies (technical access)",
+      "HR Manager": "Their assigned company only",
       "Manager": "Their assigned company only",
+      "HR": "Their assigned company only",
       "Employee": "No direct company access"
     },
     "userManagement": {
       "Admin": "Can create, update, delete all users",
+      "IT": "Can create, update, deactivate users (no delete)",
+      "HR Manager": "Can manage HR staff and employees in their company",
       "Manager": "Can view employees in their company",
+      "HR": "Can create and update employee profiles in their company",
       "Employee": "Can only view their own profile"
     },
     "dataScope": {
       "Admin": "System-wide access",
+      "IT": "System-wide technical access",
+      "HR Manager": "Company-scoped HR management access",
       "Manager": "Company-scoped access",
+      "HR": "Company-scoped HR access",
       "Employee": "Self-scoped access"
     }
   }

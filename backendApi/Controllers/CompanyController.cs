@@ -52,11 +52,11 @@ namespace HrHubAPI.Controllers
                     .Select(c => new CompanyListDto
                     {
                         Id = c.Id,
+                        CompanyId = c.CompanyId,
                         Name = c.Name,
-                        Industry = c.Industry,
+                        CompanyNameBangla = c.CompanyNameBangla,
                         City = c.City,
                         Country = c.Country,
-                        EmployeeCount = c.EmployeeCount,
                         IsActive = c.IsActive,
                         CreatedAt = c.CreatedAt
                     })
@@ -118,22 +118,20 @@ namespace HrHubAPI.Controllers
                 var companyDto = new CompanyDto
                 {
                     Id = company.Id,
+                    CompanyId = company.CompanyId,
                     Name = company.Name,
+                    CompanyNameBangla = company.CompanyNameBangla,
                     Description = company.Description,
-                    Industry = company.Industry,
-                    Website = company.Website,
                     Phone = company.Phone,
                     Email = company.Email,
                     Address = company.Address,
+                    AddressBangla = company.AddressBangla,
                     City = company.City,
                     State = company.State,
                     PostalCode = company.PostalCode,
                     Country = company.Country,
-                    RegistrationNumber = company.RegistrationNumber,
-                    TaxId = company.TaxId,
-                    EstablishedDate = company.EstablishedDate,
-                    EmployeeCount = company.EmployeeCount,
                     LogoUrl = company.LogoUrl,
+                    AuthorizedSignature = company.AuthorizedSignature,
                     CreatedAt = company.CreatedAt,
                     UpdatedAt = company.UpdatedAt,
                     IsActive = company.IsActive,
@@ -209,22 +207,20 @@ namespace HrHubAPI.Controllers
 
                 var company = new Company
                 {
+                    CompanyId = createCompanyDto.CompanyId,
                     Name = createCompanyDto.Name,
+                    CompanyNameBangla = createCompanyDto.CompanyNameBangla,
                     Description = createCompanyDto.Description,
-                    Industry = createCompanyDto.Industry,
-                    Website = createCompanyDto.Website,
                     Phone = createCompanyDto.Phone,
                     Email = createCompanyDto.Email,
                     Address = createCompanyDto.Address,
+                    AddressBangla = createCompanyDto.AddressBangla,
                     City = createCompanyDto.City,
                     State = createCompanyDto.State,
                     PostalCode = createCompanyDto.PostalCode,
                     Country = createCompanyDto.Country,
-                    RegistrationNumber = createCompanyDto.RegistrationNumber,
-                    TaxId = createCompanyDto.TaxId,
-                    EstablishedDate = createCompanyDto.EstablishedDate,
-                    EmployeeCount = createCompanyDto.EmployeeCount,
                     LogoUrl = createCompanyDto.LogoUrl,
+                    AuthorizedSignature = createCompanyDto.AuthorizedSignature,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true,
                     CreatedBy = userId
@@ -236,22 +232,20 @@ namespace HrHubAPI.Controllers
                 var companyDto = new CompanyDto
                 {
                     Id = company.Id,
+                    CompanyId = company.CompanyId,
                     Name = company.Name,
+                    CompanyNameBangla = company.CompanyNameBangla,
                     Description = company.Description,
-                    Industry = company.Industry,
-                    Website = company.Website,
                     Phone = company.Phone,
                     Email = company.Email,
                     Address = company.Address,
+                    AddressBangla = company.AddressBangla,
                     City = company.City,
                     State = company.State,
                     PostalCode = company.PostalCode,
                     Country = company.Country,
-                    RegistrationNumber = company.RegistrationNumber,
-                    TaxId = company.TaxId,
-                    EstablishedDate = company.EstablishedDate,
-                    EmployeeCount = company.EmployeeCount,
                     LogoUrl = company.LogoUrl,
+                    AuthorizedSignature = company.AuthorizedSignature,
                     CreatedAt = company.CreatedAt,
                     UpdatedAt = company.UpdatedAt,
                     IsActive = company.IsActive,
@@ -342,22 +336,20 @@ namespace HrHubAPI.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 // Update company properties
+                company.CompanyId = updateCompanyDto.CompanyId;
                 company.Name = updateCompanyDto.Name;
+                company.CompanyNameBangla = updateCompanyDto.CompanyNameBangla;
                 company.Description = updateCompanyDto.Description;
-                company.Industry = updateCompanyDto.Industry;
-                company.Website = updateCompanyDto.Website;
                 company.Phone = updateCompanyDto.Phone;
                 company.Email = updateCompanyDto.Email;
                 company.Address = updateCompanyDto.Address;
+                company.AddressBangla = updateCompanyDto.AddressBangla;
                 company.City = updateCompanyDto.City;
                 company.State = updateCompanyDto.State;
                 company.PostalCode = updateCompanyDto.PostalCode;
                 company.Country = updateCompanyDto.Country;
-                company.RegistrationNumber = updateCompanyDto.RegistrationNumber;
-                company.TaxId = updateCompanyDto.TaxId;
-                company.EstablishedDate = updateCompanyDto.EstablishedDate;
-                company.EmployeeCount = updateCompanyDto.EmployeeCount;
                 company.LogoUrl = updateCompanyDto.LogoUrl;
+                company.AuthorizedSignature = updateCompanyDto.AuthorizedSignature;
                 company.IsActive = updateCompanyDto.IsActive;
                 company.UpdatedAt = DateTime.UtcNow;
                 company.UpdatedBy = userId;
@@ -367,22 +359,20 @@ namespace HrHubAPI.Controllers
                 var companyDto = new CompanyDto
                 {
                     Id = company.Id,
+                    CompanyId = company.CompanyId,
                     Name = company.Name,
+                    CompanyNameBangla = company.CompanyNameBangla,
                     Description = company.Description,
-                    Industry = company.Industry,
-                    Website = company.Website,
                     Phone = company.Phone,
                     Email = company.Email,
                     Address = company.Address,
+                    AddressBangla = company.AddressBangla,
                     City = company.City,
                     State = company.State,
                     PostalCode = company.PostalCode,
                     Country = company.Country,
-                    RegistrationNumber = company.RegistrationNumber,
-                    TaxId = company.TaxId,
-                    EstablishedDate = company.EstablishedDate,
-                    EmployeeCount = company.EmployeeCount,
                     LogoUrl = company.LogoUrl,
+                    AuthorizedSignature = company.AuthorizedSignature,
                     CreatedAt = company.CreatedAt,
                     UpdatedAt = company.UpdatedAt,
                     IsActive = company.IsActive,
@@ -505,17 +495,7 @@ namespace HrHubAPI.Controllers
                 var activeCompanies = await _context.Companies.CountAsync(c => c.IsActive);
                 var inactiveCompanies = totalCompanies - activeCompanies;
 
-                var industriesStats = await _context.Companies
-                    .Where(c => c.IsActive && !string.IsNullOrEmpty(c.Industry))
-                    .GroupBy(c => c.Industry)
-                    .Select(g => new
-                    {
-                        Industry = g.Key,
-                        Count = g.Count()
-                    })
-                    .OrderByDescending(x => x.Count)
-                    .Take(10)
-                    .ToListAsync();
+                // Industry stats removed as Industry field was removed from Company model
 
                 var countriesStats = await _context.Companies
                     .Where(c => c.IsActive && !string.IsNullOrEmpty(c.Country))
@@ -537,7 +517,7 @@ namespace HrHubAPI.Controllers
                     {
                         c.Id,
                         c.Name,
-                        c.Industry,
+                        c.City,
                         c.CreatedAt
                     })
                     .ToListAsync();
@@ -550,7 +530,6 @@ namespace HrHubAPI.Controllers
                         ActiveCompanies = activeCompanies,
                         InactiveCompanies = inactiveCompanies
                     },
-                    IndustryBreakdown = industriesStats,
                     CountryBreakdown = countriesStats,
                     RecentCompanies = recentCompanies
                 };

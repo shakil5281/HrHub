@@ -8,5 +8,7 @@ namespace HrHubAPI.Services
         Task<string> GenerateJwtTokenAsync(ApplicationUser user);
         string GenerateRefreshToken();
         ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+        Task<bool> ValidateTokenAsync(string token);
+        ClaimsPrincipal? GetPrincipalFromToken(string token);
     }
 }

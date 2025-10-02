@@ -5,7 +5,9 @@ using HrHubAPI.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace HrHubAPI.Controllers
@@ -675,6 +677,112 @@ namespace HrHubAPI.Controllers
         }
 
         /// <summary>
+        /// Validate JWT token and return token information
+        /// </summary>
+        /// <param name="model">Token validation request containing the JWT token</param>
+        /// <returns>Token validation response with user information if valid</returns>
+        /// <response code="200">Token validation completed (check IsValid property for result)</response>
+        /// <response code="400">Invalid input</response>
+        /// <response code="500">Internal server error</response>
+        [HttpPost("validate-token")]
+        [ProducesResponseType(typeof(ApiResponse<TokenValidationResponseDto>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<IActionResult> ValidateToken([FromBody] TokenValidationDto model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid model state",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)).ToList()
+                    });
+                }
+
+                var response = new TokenValidationResponseDto();
+
+                try
+                {
+                    // First, try to get the principal from the token
+                    var principal = _jwtService.GetPrincipalFromToken(model.Token);
+                    
+                    if (principal == null)
+                    {
+                        response.IsValid = false;
+                        response.ErrorMessage = "Invalid token format or signature";
+                        
+                        return Ok(new ApiResponse<TokenValidationResponseDto>
+                        {
+                            Success = true,
+                            Message = "Token validation completed",
+                            Data = response
+                        });
+                    }
+
+                    // Extract claims from the token
+                    var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+                    var firstName = principal.FindFirst("FirstName")?.Value;
+                    var lastName = principal.FindFirst("LastName")?.Value;
+                    var roles = principal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+                    // Get expiration date from token
+                    var expClaim = principal.FindFirst(JwtRegisteredClaimNames.Exp)?.Value;
+                    DateTime? expirationDate = null;
+                    if (!string.IsNullOrEmpty(expClaim) && long.TryParse(expClaim, out long exp))
+                    {
+                        expirationDate = DateTimeOffset.FromUnixTimeSeconds(exp).DateTime;
+                    }
+
+                    // Validate the token completely (including user existence and active status)
+                    var isValid = await _jwtService.ValidateTokenAsync(model.Token);
+
+                    response.IsValid = isValid;
+                    response.UserId = userId;
+                    response.Email = email;
+                    response.FirstName = firstName;
+                    response.LastName = lastName;
+                    response.Roles = roles;
+                    response.ExpirationDate = expirationDate;
+
+                    if (!isValid)
+                    {
+                        response.ErrorMessage = "Token is expired, user not found, or user is inactive";
+                    }
+
+                    _logger.LogInformation("Token validation completed for user {Email}. Valid: {IsValid}", email, isValid);
+                }
+                catch (Exception ex)
+                {
+                    response.IsValid = false;
+                    response.ErrorMessage = "Token validation failed: " + ex.Message;
+                    
+                    _logger.LogWarning(ex, "Token validation failed");
+                }
+
+                return Ok(new ApiResponse<TokenValidationResponseDto>
+                {
+                    Success = true,
+                    Message = "Token validation completed",
+                    Data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during token validation");
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "An error occurred during token validation",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        /// <summary>
         /// Assign multiple users to a company (Admin only)
         /// </summary>
         /// <param name="model">Multiple users company assignment information</param>
@@ -767,6 +875,345 @@ namespace HrHubAPI.Controllers
                 {
                     Success = false,
                     Message = "An error occurred while assigning users to company",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Assign multiple companies to a single user (Admin only)
+        /// </summary>
+        /// <param name="model">Multiple companies assignment information</param>
+        /// <returns>Success or error response</returns>
+        /// <response code="200">Companies assigned to user successfully</response>
+        /// <response code="400">Invalid input or assignment failed</response>
+        /// <response code="401">Unauthorized - Admin role required</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Internal server error</response>
+        [HttpPost("assign-multiple-companies-to-user")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<IActionResult> AssignMultipleCompaniesToUser([FromBody] AssignMultipleCompaniesToUserDto model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid model state",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)).ToList()
+                    });
+                }
+
+                // Check if user exists
+                var user = await _userManager.FindByIdAsync(model.UserId);
+                if (user == null)
+                {
+                    return NotFound(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        Errors = new List<string> { $"User with ID {model.UserId} does not exist" }
+                    });
+                }
+
+                // Get current user ID for audit trail
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                // Validate that all companies exist
+                var existingCompanies = await _context.Companies
+                    .Where(c => model.CompanyIds.Contains(c.Id) && c.IsActive)
+                    .ToListAsync();
+
+                var nonExistentCompanyIds = model.CompanyIds.Except(existingCompanies.Select(c => c.Id)).ToList();
+                if (nonExistentCompanyIds.Any())
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Some companies not found or inactive",
+                        Errors = new List<string> { $"Companies with IDs {string.Join(", ", nonExistentCompanyIds)} do not exist or are inactive" }
+                    });
+                }
+
+                // Get existing assignments for this user
+                var existingAssignments = await _context.UserCompanies
+                    .Where(uc => uc.UserId == model.UserId && uc.IsActive)
+                    .ToListAsync();
+
+                var assignedCompanies = new List<string>();
+                var skippedCompanies = new List<string>();
+                var newAssignments = new List<UserCompany>();
+
+                foreach (var company in existingCompanies)
+                {
+                    // Check if user is already assigned to this company
+                    var existingAssignment = existingAssignments.FirstOrDefault(ea => ea.CompanyId == company.Id);
+                    
+                    if (existingAssignment != null)
+                    {
+                        // If assignment exists but is inactive, reactivate it
+                        if (!existingAssignment.IsActive)
+                        {
+                            existingAssignment.IsActive = true;
+                            existingAssignment.AssignedAt = DateTime.UtcNow;
+                            existingAssignment.AssignedBy = currentUserId;
+                            assignedCompanies.Add(company.Name);
+                        }
+                        else
+                        {
+                            skippedCompanies.Add(company.Name);
+                        }
+                    }
+                    else
+                    {
+                        // Create new assignment
+                        var newAssignment = new UserCompany
+                        {
+                            UserId = model.UserId,
+                            CompanyId = company.Id,
+                            AssignedAt = DateTime.UtcNow,
+                            AssignedBy = currentUserId,
+                            IsActive = true
+                        };
+                        
+                        newAssignments.Add(newAssignment);
+                        assignedCompanies.Add(company.Name);
+                    }
+                }
+
+                // Add new assignments to context
+                if (newAssignments.Any())
+                {
+                    _context.UserCompanies.AddRange(newAssignments);
+                }
+
+                await _context.SaveChangesAsync();
+
+                var message = $"Assigned user '{user.Email}' to {assignedCompanies.Count} companies";
+                if (skippedCompanies.Count > 0)
+                {
+                    message += $". Skipped {skippedCompanies.Count} companies (already assigned): {string.Join(", ", skippedCompanies)}";
+                }
+
+                _logger.LogInformation("Multiple companies assigned to user {UserId}. Assigned: {AssignedCount}, Skipped: {SkippedCount}", 
+                    model.UserId, assignedCompanies.Count, skippedCompanies.Count);
+
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                    Message = message,
+                    Data = new 
+                    { 
+                        UserId = model.UserId,
+                        UserEmail = user.Email,
+                        AssignedCompanies = assignedCompanies, 
+                        SkippedCompanies = skippedCompanies,
+                        TotalAssigned = assignedCompanies.Count,
+                        TotalSkipped = skippedCompanies.Count
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while assigning multiple companies to user");
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "An error occurred while assigning companies to user",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get all companies assigned to a user (Admin only)
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <returns>List of companies assigned to the user</returns>
+        /// <response code="200">Companies retrieved successfully</response>
+        /// <response code="401">Unauthorized - Admin role required</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet("user/{userId}/companies")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<IActionResult> GetUserCompanies(string userId)
+        {
+            try
+            {
+                // Check if user exists
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        Errors = new List<string> { $"User with ID {userId} does not exist" }
+                    });
+                }
+
+                // Get user's company assignments
+                var userCompanies = await _context.UserCompanies
+                    .Where(uc => uc.UserId == userId && uc.IsActive)
+                    .Include(uc => uc.Company)
+                    .Select(uc => new
+                    {
+                        uc.Id,
+                        uc.CompanyId,
+                        CompanyName = uc.Company.Name,
+                        CompanyNameBangla = uc.Company.CompanyNameBangla,
+                        uc.AssignedAt,
+                        uc.AssignedBy
+                    })
+                    .OrderBy(uc => uc.CompanyName)
+                    .ToListAsync();
+
+                // Also get the primary company (from the original one-to-many relationship)
+                string? primaryCompanyName = null;
+                if (user.CompanyId.HasValue)
+                {
+                    var primaryCompany = await _context.Companies
+                        .Where(c => c.Id == user.CompanyId.Value)
+                        .Select(c => c.Name)
+                        .FirstOrDefaultAsync();
+                    primaryCompanyName = primaryCompany;
+                }
+
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                    Message = "User companies retrieved successfully",
+                    Data = new
+                    {
+                        UserId = userId,
+                        UserEmail = user.Email,
+                        UserName = $"{user.FirstName} {user.LastName}",
+                        PrimaryCompany = new
+                        {
+                            CompanyId = user.CompanyId,
+                            CompanyName = primaryCompanyName
+                        },
+                        AssignedCompanies = userCompanies,
+                        TotalAssignedCompanies = userCompanies.Count
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving user companies for user {UserId}", userId);
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "An error occurred while retrieving user companies",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Remove companies from a user (Admin only)
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <param name="companyIds">List of company IDs to remove</param>
+        /// <returns>Success or error response</returns>
+        /// <response code="200">Companies removed from user successfully</response>
+        /// <response code="400">Invalid input</response>
+        /// <response code="401">Unauthorized - Admin role required</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Internal server error</response>
+        [HttpDelete("user/{userId}/companies")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<IActionResult> RemoveCompaniesFromUser(string userId, [FromBody] List<int> companyIds)
+        {
+            try
+            {
+                if (companyIds == null || !companyIds.Any())
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "At least one company ID must be provided",
+                        Errors = new List<string> { "CompanyIds list cannot be empty" }
+                    });
+                }
+
+                // Check if user exists
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        Errors = new List<string> { $"User with ID {userId} does not exist" }
+                    });
+                }
+
+                // Get existing assignments for this user and the specified companies
+                var existingAssignments = await _context.UserCompanies
+                    .Where(uc => uc.UserId == userId && companyIds.Contains(uc.CompanyId) && uc.IsActive)
+                    .Include(uc => uc.Company)
+                    .ToListAsync();
+
+                if (!existingAssignments.Any())
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "No active assignments found for the specified companies",
+                        Errors = new List<string> { "User is not assigned to any of the specified companies" }
+                    });
+                }
+
+                // Deactivate the assignments (soft delete)
+                var removedCompanies = new List<string>();
+                foreach (var assignment in existingAssignments)
+                {
+                    assignment.IsActive = false;
+                    removedCompanies.Add(assignment.Company.Name);
+                }
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Removed {Count} company assignments from user {UserId}", 
+                    existingAssignments.Count, userId);
+
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                    Message = $"Removed {removedCompanies.Count} company assignments from user '{user.Email}'",
+                    Data = new
+                    {
+                        UserId = userId,
+                        UserEmail = user.Email,
+                        RemovedCompanies = removedCompanies,
+                        TotalRemoved = removedCompanies.Count
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while removing companies from user {UserId}", userId);
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "An error occurred while removing companies from user",
                     Errors = new List<string> { ex.Message }
                 });
             }

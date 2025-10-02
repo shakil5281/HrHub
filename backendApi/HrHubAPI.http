@@ -1,6 +1,396 @@
-@HrHubAPI_HostAddress = http://localhost:5049
+### Login to get a token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
 
-GET {{HrHubAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
 
-###
+### Register a new user (Admin only)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "email": "john.doe@example.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "department": "IT",
+  "position": "Developer",
+  "companyId": 1
+}
+
+### Validate Token
+POST {{baseUrl}}/api/auth/validate-token
+Content-Type: application/json
+
+{
+  "token": "{{authToken}}"
+}
+
+### Get user profile (requires valid token)
+GET {{baseUrl}}/api/auth/profile
+Authorization: Bearer {{authToken}}
+
+### Refresh token
+POST {{baseUrl}}/api/auth/refresh-token
+Content-Type: application/json
+
+{
+  "token": "{{authToken}}",
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Revoke token (logout)
+POST {{baseUrl}}/api/auth/revoke-token
+Authorization: Bearer {{authToken}}
+
+### Assign role to user (Admin only)
+POST {{baseUrl}}/api/auth/assign-role
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "userId": "user-id-here",
+  "roleName": "Manager"
+}
+
+### Assign user to company (Admin only)
+POST {{baseUrl}}/api/auth/assign-company
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "userId": "user-id-here",
+  "companyId": 1
+}
+
+### Assign multiple users to company (Admin only)
+POST {{baseUrl}}/api/auth/assign-multiple-users-to-company
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "userIds": ["user-id-1", "user-id-2"],
+  "companyId": 1
+}
+
+### Assign multiple companies to a single user (Admin only)
+POST {{baseUrl}}/api/auth/assign-multiple-companies-to-user
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "userId": "user-guid-here",
+  "companyIds": [1, 2, 3, 4]
+}
+
+### Get all companies assigned to a user (Admin only)
+GET {{baseUrl}}/api/auth/user/user-id-here/companies
+Authorization: Bearer {{authToken}}
+
+### Remove companies from a user (Admin only)
+DELETE {{baseUrl}}/api/auth/user/user-id-here/companies
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+[1, 2, 3]
+
+### Get dashboard data (requires authentication)
+GET {{baseUrl}}/api/dashboard
+Authorization: Bearer {{authToken}}
+
+### Create a company (Admin only)
+POST {{baseUrl}}/api/company
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Tech Solutions Inc.",
+  "description": "A leading technology solutions provider",
+  "address": "123 Tech Street, Silicon Valley, CA 94000",
+  "phone": "+1-555-0123",
+  "email": "info@techsolutions.com",
+  "website": "https://www.techsolutions.com"
+}
+
+### Get all companies (Admin/Manager only)
+GET {{baseUrl}}/api/company
+Authorization: Bearer {{authToken}}
+
+### Get company by ID
+GET {{baseUrl}}/api/company/1
+Authorization: Bearer {{authToken}}
+
+### Update company (Admin only)
+PUT {{baseUrl}}/api/company/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Updated Tech Solutions Inc.",
+  "description": "An updated leading technology solutions provider",
+  "address": "456 Updated Tech Street, Silicon Valley, CA 94000",
+  "phone": "+1-555-0456",
+  "email": "info@updatedtechsolutions.com",
+  "website": "https://www.updatedtechsolutions.com"
+}
+
+### Delete company (Admin only)
+DELETE {{baseUrl}}/api/company/1
+Authorization: Bearer {{authToken}}
+
+### Get all departments (Admin/Manager/HR/IT only)
+GET {{baseUrl}}/api/department
+Authorization: Bearer {{authToken}}
+
+### Get department by ID
+GET {{baseUrl}}/api/department/1
+Authorization: Bearer {{authToken}}
+
+### Create a department (Admin/HR Manager/IT only)
+POST {{baseUrl}}/api/department
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Information Technology",
+  "nameBangla": "Z_¨cÖhyw³wZ"
+}
+
+### Update department (Admin/HR Manager/IT only)
+PUT {{baseUrl}}/api/department/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Updated Information Technology",
+  "nameBangla": "Avc‡WU‡qW Z_¨cÖhyw³wZ",
+  "isActive": true
+}
+
+### Delete department (Admin/IT only)
+DELETE {{baseUrl}}/api/department/1
+Authorization: Bearer {{authToken}}
+
+### Get department statistics (Admin/HR Manager/IT only)
+GET {{baseUrl}}/api/department/statistics
+Authorization: Bearer {{authToken}}
+
+### === IT Department & User Creation Workflow ===
+
+### Step 1: Create IT Department
+POST {{baseUrl}}/api/department
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Information Technology",
+  "nameBangla": "Z_¨cÖhyw³wZ"
+}
+
+### Step 2: Create IT User (after creating department)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "email": "john.doe@company.com",
+  "password": "ITUser123!",
+  "confirmPassword": "ITUser123!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "department": "Information Technology",
+  "position": "Software Developer",
+  "companyId": 1
+}
+
+### === Section API Endpoints ===
+
+### Get all sections (Admin/Manager/HR/IT only)
+GET {{baseUrl}}/api/section
+Authorization: Bearer {{authToken}}
+
+### Get all sections with department filter
+GET {{baseUrl}}/api/section?departmentId=1
+Authorization: Bearer {{authToken}}
+
+### Get section by ID
+GET {{baseUrl}}/api/section/1
+Authorization: Bearer {{authToken}}
+
+### Create a section (Admin/HR Manager/IT only)
+POST {{baseUrl}}/api/section
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "departmentId": 1,
+  "name": "Software Development",
+  "nameBangla": "mdUIq¨vj †W‡fjc‡g›U"
+}
+
+### Update section (Admin/HR Manager/IT only)
+PUT {{baseUrl}}/api/section/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "departmentId": 1,
+  "name": "Application Development",
+  "nameBangla": "A¨vwcø‡Kkb †W‡fjc‡g›U",
+  "isActive": true
+}
+
+### Delete section (Admin/IT only)
+DELETE {{baseUrl}}/api/section/1
+Authorization: Bearer {{authToken}}
+
+### Get sections by department
+GET {{baseUrl}}/api/section/department/1
+Authorization: Bearer {{authToken}}
+
+### Get section statistics (Admin/HR Manager/IT only)
+GET {{baseUrl}}/api/section/statistics
+Authorization: Bearer {{authToken}}
+
+### === Designation API Endpoints ===
+
+### Get all designations (Admin/Manager/HR/IT only)
+GET {{baseUrl}}/api/designation
+Authorization: Bearer {{authToken}}
+
+### Get all designations with section filter
+GET {{baseUrl}}/api/designation?sectionId=1
+Authorization: Bearer {{authToken}}
+
+### Get all designations with grade filter
+GET {{baseUrl}}/api/designation?grade=A
+Authorization: Bearer {{authToken}}
+
+### Get designation by ID
+GET {{baseUrl}}/api/designation/1
+Authorization: Bearer {{authToken}}
+
+### Create a designation (Admin/HR Manager/IT only)
+POST {{baseUrl}}/api/designation
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "sectionId": 1,
+  "name": "Senior Software Engineer",
+  "nameBangla": "wmwbqi mdUIq¨vj BwÄwbqvi",
+  "grade": "A",
+  "attendanceBonus": 5000.00
+}
+
+### Update designation (Admin/HR Manager/IT only)
+PUT {{baseUrl}}/api/designation/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "sectionId": 1,
+  "name": "Lead Software Engineer",
+  "nameBangla": "jxW mdUIq¨vj BwÄwbqvi",
+  "grade": "A+",
+  "attendanceBonus": 7500.00,
+  "isActive": true
+}
+
+### Delete designation (Admin/IT only)
+DELETE {{baseUrl}}/api/designation/1
+Authorization: Bearer {{authToken}}
+
+### Get designations by section
+GET {{baseUrl}}/api/designation/section/1
+Authorization: Bearer {{authToken}}
+
+### Get designation statistics (Admin/HR Manager/IT only)
+GET {{baseUrl}}/api/designation/statistics
+Authorization: Bearer {{authToken}}
+
+###############################################
+# Employee API Endpoints (IT role has full access)
+###############################################
+
+### Get all employees with optional filters
+GET {{baseUrl}}/api/employee?includeInactive=false&departmentId=1&sectionId=1&designationId=1
+Authorization: Bearer {{authToken}}
+
+### Get all employees (simple)
+GET {{baseUrl}}/api/employee
+Authorization: Bearer {{authToken}}
+
+### Get employee by ID
+GET {{baseUrl}}/api/employee/1
+Authorization: Bearer {{authToken}}
+
+### Create new employee (Admin/HR/IT only)
+POST {{baseUrl}}/api/employee
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "John Doe",
+  "nameBangla": "জন ডো",
+  "nidNo": "1234567890123",
+  "fatherName": "Robert Doe",
+  "motherName": "Mary Doe",
+  "fatherNameBangla": "রবার্ট ডো",
+  "motherNameBangla": "মেরি ডো",
+  "dateOfBirth": "1990-01-15T00:00:00Z",
+  "address": "123 Main Street, Dhaka, Bangladesh",
+  "joiningDate": "2024-01-01T00:00:00Z",
+  "departmentId": 1,
+  "sectionId": 1,
+  "designationId": 1,
+  "grossSalary": 50000.00,
+  "basicSalary": 30000.00,
+  "bankAccountNo": "1234567890"
+}
+
+### Update employee (Admin/HR/IT only)
+PUT {{baseUrl}}/api/employee/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "John Smith",
+  "nameBangla": "জন স্মিথ",
+  "nidNo": "1234567890123",
+  "fatherName": "Robert Smith",
+  "motherName": "Mary Smith",
+  "fatherNameBangla": "রবার্ট স্মিথ",
+  "motherNameBangla": "মেরি স্মিথ",
+  "dateOfBirth": "1990-01-15T00:00:00Z",
+  "address": "456 Updated Street, Dhaka, Bangladesh",
+  "joiningDate": "2024-01-01T00:00:00Z",
+  "departmentId": 1,
+  "sectionId": 1,
+  "designationId": 2,
+  "grossSalary": 55000.00,
+  "basicSalary": 35000.00,
+  "bankAccountNo": "1234567890",
+  "isActive": true
+}
+
+### Delete employee (Admin/IT only)
+DELETE {{baseUrl}}/api/employee/1
+Authorization: Bearer {{authToken}}
+
+### Get employee summary (for dropdowns)
+GET {{baseUrl}}/api/employee/summary?departmentId=1&sectionId=1
+Authorization: Bearer {{authToken}}
+
+### Get employee summary (all active employees)
+GET {{baseUrl}}/api/employee/summary
+Authorization: Bearer {{authToken}}
+
+@baseUrl = https://localhost:7000
+@authToken = 
+@refreshToken = 

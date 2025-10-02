@@ -1,0 +1,158 @@
+{
+  "title": "IT User - Complete Section API Access Examples",
+  "description": "Comprehensive examples showing IT user's full access to Section API",
+  "authentication": {
+    "note": "All requests require valid JWT token with IT role",
+    "header": "Authorization: Bearer {it_user_jwt_token}"
+  },
+  "examples": [
+    {
+      "operation": "View All Sections",
+      "method": "GET",
+      "endpoint": "/api/section",
+      "description": "Get all sections across all departments",
+      "access_level": "FULL",
+      "query_parameters": {
+        "departmentId": "Optional - filter by specific department",
+        "includeInactive": "Optional - include inactive sections"
+      }
+    },
+    {
+      "operation": "View Sections by Department",
+      "method": "GET", 
+      "endpoint": "/api/section/department/1",
+      "description": "Get all sections for a specific department",
+      "access_level": "FULL"
+    },
+    {
+      "operation": "Get Section Details",
+      "method": "GET",
+      "endpoint": "/api/section/1",
+      "description": "Get detailed information about a specific section",
+      "access_level": "FULL"
+    },
+    {
+      "operation": "Create New Section",
+      "method": "POST",
+      "endpoint": "/api/section",
+      "description": "Create a new section in any department",
+      "access_level": "FULL",
+      "payload": {
+        "departmentId": 1,
+        "name": "DevOps Engineering",
+        "nameBangla": "‡WfAvc&m BwÄwbqvwis"
+      }
+    },
+    {
+      "operation": "Update Section",
+      "method": "PUT",
+      "endpoint": "/api/section/1",
+      "description": "Update any section details including department transfer",
+      "access_level": "FULL",
+      "payload": {
+        "departmentId": 1,
+        "name": "Cloud Infrastructure",
+        "nameBangla": "K¬vDW BbdÖv÷ªvKPvi",
+        "isActive": true
+      }
+    },
+    {
+      "operation": "Delete Section",
+      "method": "DELETE",
+      "endpoint": "/api/section/1",
+      "description": "Delete sections (same privilege as Admin)",
+      "access_level": "FULL - ADMIN LEVEL",
+      "note": "IT users have the same delete privileges as Admin users"
+    },
+    {
+      "operation": "View Section Statistics",
+      "method": "GET",
+      "endpoint": "/api/section/statistics",
+      "description": "Access section analytics and distribution data",
+      "access_level": "FULL",
+      "returns": {
+        "overview": "Total, active, inactive section counts",
+        "departmentBreakdown": "Sections per department",
+        "recentSections": "Recently created sections"
+      }
+    }
+  ],
+  "suttonnyMJ_examples": {
+    "description": "SutonnyMJ font examples for Bangla section names",
+    "examples": [
+      {
+        "english": "Software Development",
+        "suttonnyMJ": "mdUIq¨vj †W‡fjc‡g›U"
+      },
+      {
+        "english": "System Administration", 
+        "suttonnyMJ": "wm‡÷g A¨vWwgwb‡÷ªkb"
+      },
+      {
+        "english": "Network Security",
+        "suttonnyMJ": "†bUIqvK© wbivcËv"
+      },
+      {
+        "english": "DevOps Engineering",
+        "suttonnyMJ": "‡WfAvc&m BwÄwbqvwis"
+      },
+      {
+        "english": "Cloud Infrastructure",
+        "suttonnyMJ": "K¬vDW BbdÖv÷ªvKPvi"
+      }
+    ]
+  },
+  "workflow_example": {
+    "title": "Complete Section Management Workflow for IT User",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Login as IT user",
+        "endpoint": "POST /api/auth/login"
+      },
+      {
+        "step": 2,
+        "action": "View all departments",
+        "endpoint": "GET /api/department"
+      },
+      {
+        "step": 3,
+        "action": "View existing sections",
+        "endpoint": "GET /api/section"
+      },
+      {
+        "step": 4,
+        "action": "Create new section",
+        "endpoint": "POST /api/section"
+      },
+      {
+        "step": 5,
+        "action": "Update section details",
+        "endpoint": "PUT /api/section/{id}"
+      },
+      {
+        "step": 6,
+        "action": "View section statistics",
+        "endpoint": "GET /api/section/statistics"
+      },
+      {
+        "step": 7,
+        "action": "Delete section if needed",
+        "endpoint": "DELETE /api/section/{id}"
+      }
+    ]
+  },
+  "access_summary": {
+    "read_operations": "FULL ACCESS - Can view all sections, details, and statistics",
+    "create_operations": "FULL ACCESS - Can create sections in any department", 
+    "update_operations": "FULL ACCESS - Can modify all section properties",
+    "delete_operations": "FULL ACCESS - Same privileges as Admin users",
+    "special_features": [
+      "Department filtering",
+      "SutonnyMJ font support",
+      "Statistics and analytics",
+      "Audit trail logging",
+      "Data validation"
+    ]
+  }
+}
