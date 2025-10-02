@@ -1,0 +1,78 @@
+{
+  "roles": [
+    {
+      "name": "Admin",
+      "description": "System Administrator with full access to all features and data",
+      "permissions": [
+        "Create, read, update, delete companies",
+        "Create, read, update, delete users",
+        "Assign users to companies (single and multiple)",
+        "Assign roles to users",
+        "View all employees across all companies",
+        "View company statistics and reports",
+        "Manage system settings",
+        "Access all API endpoints"
+      ],
+      "restrictions": "None - full system access",
+      "defaultUser": "admin@hrhub.com"
+    },
+    {
+      "name": "Manager",
+      "description": "Company Manager with access to their company's data and employees",
+      "permissions": [
+        "View employees in their company only",
+        "View employee details in their company",
+        "View employees by department in their company",
+        "Update employee information (limited)",
+        "View their own profile"
+      ],
+      "restrictions": "Limited to their assigned company's data only",
+      "defaultUser": "None - must be assigned by Admin"
+    },
+    {
+      "name": "Employee",
+      "description": "Regular employee with basic access to their own information",
+      "permissions": [
+        "View their own profile",
+        "Update their own profile (limited fields)",
+        "Login and access basic features"
+      ],
+      "restrictions": "Can only access their own data",
+      "defaultUser": "None - must be assigned by Admin"
+    }
+  ],
+  "roleHierarchy": {
+    "Admin": {
+      "level": 3,
+      "canManage": ["Manager", "Employee"],
+      "description": "Highest level - can manage all other roles"
+    },
+    "Manager": {
+      "level": 2,
+      "canManage": ["Employee"],
+      "description": "Mid level - can manage employees in their company"
+    },
+    "Employee": {
+      "level": 1,
+      "canManage": [],
+      "description": "Base level - can only manage their own data"
+    }
+  },
+  "accessControl": {
+    "companyAccess": {
+      "Admin": "All companies",
+      "Manager": "Their assigned company only",
+      "Employee": "No direct company access"
+    },
+    "userManagement": {
+      "Admin": "Can create, update, delete all users",
+      "Manager": "Can view employees in their company",
+      "Employee": "Can only view their own profile"
+    },
+    "dataScope": {
+      "Admin": "System-wide access",
+      "Manager": "Company-scoped access",
+      "Employee": "Self-scoped access"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "Email": "employee@company.com",
+  "Password": "Employee@123",
+  "ConfirmPassword": "Employee@123",
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Department": "IT",
+  "Position": "Software Developer",
+  "CompanyId": 1
+}

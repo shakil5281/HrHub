@@ -1,0 +1,18 @@
+{
+  "Name": "TechCorp Solutions",
+  "Description": "A leading technology company specializing in software development and IT consulting services.",
+  "Industry": "Technology",
+  "Website": "https://www.techcorp.com",
+  "Phone": "+1-555-0123",
+  "Email": "info@techcorp.com",
+  "Address": "123 Innovation Drive",
+  "City": "San Francisco",
+  "State": "California",
+  "PostalCode": "94105",
+  "Country": "United States",
+  "RegistrationNumber": "TC-2024-001",
+  "TaxId": "12-3456789",
+  "EstablishedDate": "2020-01-15T00:00:00Z",
+  "EmployeeCount": 150,
+  "LogoUrl": "https://www.techcorp.com/logo.png"
+}
