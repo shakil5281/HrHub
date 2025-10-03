@@ -2,6 +2,7 @@ using HrHubAPI.Data;
 using HrHubAPI.DTOs;
 using HrHubAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -14,67 +15,152 @@ namespace HrHubAPI.Controllers
     public class SectionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<SectionController> _logger;
 
-        public SectionController(ApplicationDbContext context, ILogger<SectionController> logger)
+        public SectionController(
+            ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager,
+            ILogger<SectionController> logger)
         {
             _context = context;
+            _userManager = userManager;
             _logger = logger;
         }
 
         /// <summary>
-        /// Get all sections (Admin/Manager/HR/IT only)
+        /// Get sections based on user role (Admin gets all sections, others get sections from their assigned companies)
         /// </summary>
-        /// <param name="departmentId">Optional department ID to filter sections</param>
-        /// <param name="includeInactive">Include inactive sections</param>
-        /// <returns>List of sections</returns>
+        /// <param name="departmentId">Optional department ID to filter sections (Admin only)</param>
+        /// <param name="includeInactive">Include inactive sections (Admin only)</param>
+        /// <returns>List of sections based on user role</returns>
         /// <response code="200">Sections retrieved successfully</response>
         /// <response code="401">Unauthorized - Valid JWT token required</response>
-        /// <response code="403">Forbidden - Admin/Manager/HR/IT role required</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
-        [Authorize(Roles = "Admin,Manager,HR,HR Manager,IT")]
+        [Authorize] // Allow all authenticated users
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<SectionListDto>>), 200)]
         [ProducesResponseType(typeof(ApiResponse<object>), 401)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 403)]
         [ProducesResponseType(typeof(ApiResponse<object>), 500)]
         public async Task<IActionResult> GetAllSections([FromQuery] int? departmentId = null, [FromQuery] bool includeInactive = false)
         {
             try
             {
-                var query = _context.Sections
-                    .Include(s => s.Department)
-                    .AsQueryable();
-
-                if (departmentId.HasValue)
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
                 {
-                    query = query.Where(s => s.DepartmentId == departmentId.Value);
-                }
-
-                if (!includeInactive)
-                {
-                    query = query.Where(s => s.IsActive);
-                }
-
-                var sections = await query
-                    .OrderBy(s => s.Department.Name)
-                    .ThenBy(s => s.Name)
-                    .Select(s => new SectionListDto
+                    return Unauthorized(new ApiResponse<object>
                     {
-                        Id = s.Id,
-                        DepartmentId = s.DepartmentId,
-                        DepartmentName = s.Department.Name,
-                        Name = s.Name,
-                        NameBangla = s.NameBangla,
-                        IsActive = s.IsActive,
-                        CreatedAt = s.CreatedAt
-                    })
-                    .ToListAsync();
+                        Success = false,
+                        Message = "Invalid token",
+                        Errors = new List<string> { "User ID not found in token" }
+                    });
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Unauthorized(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        Errors = new List<string> { "User does not exist" }
+                    });
+                }
+
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var isAdmin = userRoles.Contains("Admin");
+
+                List<SectionListDto> sections;
+
+                if (isAdmin)
+                {
+                    // Admin users can see all sections
+                    var query = _context.Sections
+                        .Include(s => s.Department)
+                        .AsQueryable();
+
+                    if (departmentId.HasValue)
+                    {
+                        query = query.Where(s => s.DepartmentId == departmentId.Value);
+                    }
+
+                    if (!includeInactive)
+                    {
+                        query = query.Where(s => s.IsActive);
+                    }
+
+                    sections = await query
+                        .OrderBy(s => s.Department.Name)
+                        .ThenBy(s => s.Name)
+                        .Select(s => new SectionListDto
+                        {
+                            Id = s.Id,
+                            DepartmentId = s.DepartmentId,
+                            DepartmentName = s.Department.Name,
+                            Name = s.Name,
+                            NameBangla = s.NameBangla,
+                            IsActive = s.IsActive,
+                            CreatedAt = s.CreatedAt
+                        })
+                        .ToListAsync();
+
+                    _logger.LogInformation("Admin user {UserId} retrieved all sections", userId);
+                }
+                else
+                {
+                    // Non-admin users can only see sections from their assigned companies
+                    var userCompanyIds = new List<int>();
+
+                    // Get primary company (from CompanyId field)
+                    if (user.CompanyId.HasValue)
+                    {
+                        userCompanyIds.Add(user.CompanyId.Value);
+                    }
+
+                    // Get additional companies from UserCompany relationship
+                    var additionalCompanies = await _context.UserCompanies
+                        .Where(uc => uc.UserId == userId && uc.IsActive)
+                        .Select(uc => uc.CompanyId)
+                        .ToListAsync();
+
+                    userCompanyIds.AddRange(additionalCompanies);
+                    userCompanyIds = userCompanyIds.Distinct().ToList();
+
+                    if (!userCompanyIds.Any())
+                    {
+                        // User has no company assigned
+                        sections = new List<SectionListDto>();
+                    }
+                    else
+                    {
+                        var query = _context.Sections
+                            .Include(s => s.Department)
+                            .Where(s => userCompanyIds.Contains(s.Department.CompanyId) && s.IsActive);
+
+                        sections = await query
+                            .OrderBy(s => s.Department.Name)
+                            .ThenBy(s => s.Name)
+                            .Select(s => new SectionListDto
+                            {
+                                Id = s.Id,
+                                DepartmentId = s.DepartmentId,
+                                DepartmentName = s.Department.Name,
+                                Name = s.Name,
+                                NameBangla = s.NameBangla,
+                                IsActive = s.IsActive,
+                                CreatedAt = s.CreatedAt
+                            })
+                            .ToListAsync();
+                    }
+
+                    _logger.LogInformation("User {UserId} retrieved {Count} sections from assigned companies", userId, sections.Count);
+                }
 
                 return Ok(new ApiResponse<IEnumerable<SectionListDto>>
                 {
                     Success = true,
-                    Message = "Sections retrieved successfully",
+                    Message = isAdmin ? "All sections retrieved successfully" : "Assigned company sections retrieved successfully",
                     Data = sections
                 });
             }

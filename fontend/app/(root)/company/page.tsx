@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { IconPlus, IconBuilding, IconUsers, IconTrendingUp, IconRefresh } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { CompanyForm } from "@/components/company/company-form"
 import { CompanyTable } from "@/components/company/company-table"
 import { getAllCompanies, type Company } from "@/lib/api/company"
 
@@ -13,8 +13,7 @@ export default function CompanyPage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined)
+  const router = useRouter()
 
   const fetchCompanies = async () => {
     try {
@@ -39,19 +38,9 @@ export default function CompanyPage() {
   }
 
   const handleEdit = (company: Company) => {
-    setEditingCompany(company)
-    setFormOpen(true)
-  }
-
-  const handleFormSuccess = () => {
-    fetchCompanies()
-    setEditingCompany(undefined)
-  }
-
-  const handleCloseForm = (open: boolean) => {
-    setFormOpen(open)
-    if (!open) {
-      setEditingCompany(undefined)
+    const id = company.id || company.companyId
+    if (id) {
+      router.push(`/company/${id}/edit`)
     }
   }
 
@@ -78,7 +67,7 @@ export default function CompanyPage() {
             <IconRefresh className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          <Button onClick={() => setFormOpen(true)}>
+          <Button onClick={() => router.push('/company/add')}>
             <IconPlus className="mr-2 h-4 w-4" />
             Add Company
           </Button>
@@ -169,14 +158,6 @@ export default function CompanyPage() {
         loading={loading}
         onEdit={handleEdit}
         onRefresh={handleRefresh}
-      />
-
-      {/* Company Form Modal */}
-      <CompanyForm
-        open={formOpen}
-        onOpenChange={handleCloseForm}
-        company={editingCompany}
-        onSuccess={handleFormSuccess}
       />
     </div>
   )

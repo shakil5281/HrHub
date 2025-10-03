@@ -1,3 +1,5 @@
 export { CompanyForm } from './company-form'
+export { CompanyAddForm } from './company-add-form'
+export { CompanyEditForm } from './company-edit-form'
 export { CompanyTable } from './company-table'
 export { CompanyStats } from './company-stats'

@@ -2,6 +2,7 @@ using HrHubAPI.Data;
 using HrHubAPI.DTOs;
 using HrHubAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -14,79 +15,170 @@ namespace HrHubAPI.Controllers
     public class DesignationController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<DesignationController> _logger;
 
-        public DesignationController(ApplicationDbContext context, ILogger<DesignationController> logger)
+        public DesignationController(
+            ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager,
+            ILogger<DesignationController> logger)
         {
             _context = context;
+            _userManager = userManager;
             _logger = logger;
         }
 
         /// <summary>
-        /// Get all designations (Admin/Manager/HR/IT only)
+        /// Get designations based on user role (Admin gets all designations, others get designations from their assigned companies)
         /// </summary>
-        /// <param name="sectionId">Optional section ID to filter designations</param>
-        /// <param name="grade">Optional grade to filter designations</param>
-        /// <param name="includeInactive">Include inactive designations</param>
-        /// <returns>List of designations</returns>
+        /// <param name="sectionId">Optional section ID to filter designations (Admin only)</param>
+        /// <param name="grade">Optional grade to filter designations (Admin only)</param>
+        /// <param name="includeInactive">Include inactive designations (Admin only)</param>
+        /// <returns>List of designations based on user role</returns>
         /// <response code="200">Designations retrieved successfully</response>
         /// <response code="401">Unauthorized - Valid JWT token required</response>
-        /// <response code="403">Forbidden - Admin/Manager/HR/IT role required</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
-        [Authorize(Roles = "Admin,Manager,HR,HR Manager,IT")]
+        [Authorize] // Allow all authenticated users
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<DesignationListDto>>), 200)]
         [ProducesResponseType(typeof(ApiResponse<object>), 401)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 403)]
         [ProducesResponseType(typeof(ApiResponse<object>), 500)]
         public async Task<IActionResult> GetAllDesignations([FromQuery] int? sectionId = null, [FromQuery] string? grade = null, [FromQuery] bool includeInactive = false)
         {
             try
             {
-                var query = _context.Designations
-                    .Include(d => d.Section)
-                    .ThenInclude(s => s.Department)
-                    .AsQueryable();
-
-                if (sectionId.HasValue)
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
                 {
-                    query = query.Where(d => d.SectionId == sectionId.Value);
-                }
-
-                if (!string.IsNullOrEmpty(grade))
-                {
-                    query = query.Where(d => d.Grade.ToLower() == grade.ToLower());
-                }
-
-                if (!includeInactive)
-                {
-                    query = query.Where(d => d.IsActive);
-                }
-
-                var designations = await query
-                    .OrderBy(d => d.Section.Department.Name)
-                    .ThenBy(d => d.Section.Name)
-                    .ThenBy(d => d.Grade)
-                    .ThenBy(d => d.Name)
-                    .Select(d => new DesignationListDto
+                    return Unauthorized(new ApiResponse<object>
                     {
-                        Id = d.Id,
-                        SectionId = d.SectionId,
-                        SectionName = d.Section.Name,
-                        DepartmentName = d.Section.Department.Name,
-                        Name = d.Name,
-                        NameBangla = d.NameBangla,
-                        Grade = d.Grade,
-                        AttendanceBonus = d.AttendanceBonus,
-                        IsActive = d.IsActive,
-                        CreatedAt = d.CreatedAt
-                    })
-                    .ToListAsync();
+                        Success = false,
+                        Message = "Invalid token",
+                        Errors = new List<string> { "User ID not found in token" }
+                    });
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Unauthorized(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        Errors = new List<string> { "User does not exist" }
+                    });
+                }
+
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var isAdmin = userRoles.Contains("Admin");
+
+                List<DesignationListDto> designations;
+
+                if (isAdmin)
+                {
+                    // Admin users can see all designations
+                    var query = _context.Designations
+                        .Include(d => d.Section)
+                        .ThenInclude(s => s.Department)
+                        .AsQueryable();
+
+                    if (sectionId.HasValue)
+                    {
+                        query = query.Where(d => d.SectionId == sectionId.Value);
+                    }
+
+                    if (!string.IsNullOrEmpty(grade))
+                    {
+                        query = query.Where(d => d.Grade.ToLower() == grade.ToLower());
+                    }
+
+                    if (!includeInactive)
+                    {
+                        query = query.Where(d => d.IsActive);
+                    }
+
+                    designations = await query
+                        .OrderBy(d => d.Section.Department.Name)
+                        .ThenBy(d => d.Section.Name)
+                        .ThenBy(d => d.Grade)
+                        .ThenBy(d => d.Name)
+                        .Select(d => new DesignationListDto
+                        {
+                            Id = d.Id,
+                            SectionId = d.SectionId,
+                            SectionName = d.Section.Name,
+                            DepartmentName = d.Section.Department.Name,
+                            Name = d.Name,
+                            NameBangla = d.NameBangla,
+                            Grade = d.Grade,
+                            AttendanceBonus = d.AttendanceBonus,
+                            IsActive = d.IsActive,
+                            CreatedAt = d.CreatedAt
+                        })
+                        .ToListAsync();
+
+                    _logger.LogInformation("Admin user {UserId} retrieved all designations", userId);
+                }
+                else
+                {
+                    // Non-admin users can only see designations from their assigned companies
+                    var userCompanyIds = new List<int>();
+
+                    // Get primary company (from CompanyId field)
+                    if (user.CompanyId.HasValue)
+                    {
+                        userCompanyIds.Add(user.CompanyId.Value);
+                    }
+
+                    // Get additional companies from UserCompany relationship
+                    var additionalCompanies = await _context.UserCompanies
+                        .Where(uc => uc.UserId == userId && uc.IsActive)
+                        .Select(uc => uc.CompanyId)
+                        .ToListAsync();
+
+                    userCompanyIds.AddRange(additionalCompanies);
+                    userCompanyIds = userCompanyIds.Distinct().ToList();
+
+                    if (!userCompanyIds.Any())
+                    {
+                        // User has no company assigned
+                        designations = new List<DesignationListDto>();
+                    }
+                    else
+                    {
+                        var query = _context.Designations
+                            .Include(d => d.Section)
+                            .ThenInclude(s => s.Department)
+                            .Where(d => userCompanyIds.Contains(d.Section.Department.CompanyId) && d.IsActive);
+
+                        designations = await query
+                            .OrderBy(d => d.Section.Department.Name)
+                            .ThenBy(d => d.Section.Name)
+                            .ThenBy(d => d.Grade)
+                            .ThenBy(d => d.Name)
+                            .Select(d => new DesignationListDto
+                            {
+                                Id = d.Id,
+                                SectionId = d.SectionId,
+                                SectionName = d.Section.Name,
+                                DepartmentName = d.Section.Department.Name,
+                                Name = d.Name,
+                                NameBangla = d.NameBangla,
+                                Grade = d.Grade,
+                                AttendanceBonus = d.AttendanceBonus,
+                                IsActive = d.IsActive,
+                                CreatedAt = d.CreatedAt
+                            })
+                            .ToListAsync();
+                    }
+
+                    _logger.LogInformation("User {UserId} retrieved {Count} designations from assigned companies", userId, designations.Count);
+                }
 
                 return Ok(new ApiResponse<IEnumerable<DesignationListDto>>
                 {
                     Success = true,
-                    Message = "Designations retrieved successfully",
+                    Message = isAdmin ? "All designations retrieved successfully" : "Assigned company designations retrieved successfully",
                     Data = designations
                 });
             }

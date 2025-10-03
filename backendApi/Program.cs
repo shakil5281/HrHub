@@ -158,7 +158,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Ensure database is created and seeded
+// Ensure database is created and seeded (without deleting existing data)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -168,12 +168,10 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
         
-        // Ensure database is created with latest schema
-        // Note: This will recreate the database if schema changes are detected
-        context.Database.EnsureDeleted();
+        // Only create database if it doesn't exist (preserves existing data)
         context.Database.EnsureCreated();
         
-        // Seed default admin user
+        // Seed default admin user (only if doesn't exist)
         await SeedDefaultUsers(userManager, roleManager);
     }
     catch (Exception ex)

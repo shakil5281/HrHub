@@ -119,9 +119,21 @@ namespace HrHubAPI.Data
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
                 
-                // Create index on Name for better query performance
+                // Configure relationship with Company
+                entity.HasOne(d => d.Company)
+                      .WithMany()
+                      .HasForeignKey(d => d.CompanyId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                
+                // Create indexes for better query performance
                 entity.HasIndex(e => e.Name);
+                entity.HasIndex(e => e.CompanyId);
                 entity.HasIndex(e => e.IsActive);
+                
+                // Create composite index for company + department name uniqueness
+                entity.HasIndex(e => new { e.CompanyId, e.Name })
+                      .IsUnique()
+                      .HasDatabaseName("IX_Department_CompanyId_Name");
             });
 
             // Configure Section entity

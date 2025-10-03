@@ -2,6 +2,7 @@ using HrHubAPI.Data;
 using HrHubAPI.DTOs;
 using HrHubAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -14,58 +15,143 @@ namespace HrHubAPI.Controllers
     public class CompanyController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<CompanyController> _logger;
 
-        public CompanyController(ApplicationDbContext context, ILogger<CompanyController> logger)
+        public CompanyController(
+            ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager,
+            ILogger<CompanyController> logger)
         {
             _context = context;
+            _userManager = userManager;
             _logger = logger;
         }
 
         /// <summary>
-        /// Get all companies (Admin only)
+        /// Get companies based on user role (Admin gets all companies, others get their assigned companies)
         /// </summary>
-        /// <returns>List of companies</returns>
+        /// <param name="includeInactive">Include inactive companies (Admin only)</param>
+        /// <returns>List of companies based on user role</returns>
         /// <response code="200">Companies retrieved successfully</response>
         /// <response code="401">Unauthorized - Valid JWT token required</response>
-        /// <response code="403">Forbidden - Admin role required</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize] // Allow all authenticated users
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<CompanyListDto>>), 200)]
         [ProducesResponseType(typeof(ApiResponse<object>), 401)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 403)]
         [ProducesResponseType(typeof(ApiResponse<object>), 500)]
         public async Task<IActionResult> GetAllCompanies([FromQuery] bool includeInactive = false)
         {
             try
             {
-                var query = _context.Companies.AsQueryable();
-
-                if (!includeInactive)
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
                 {
-                    query = query.Where(c => c.IsActive);
+                    return Unauthorized(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid token",
+                        Errors = new List<string> { "User ID not found in token" }
+                    });
                 }
 
-                var companies = await query
-                    .OrderBy(c => c.Name)
-                    .Select(c => new CompanyListDto
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Unauthorized(new ApiResponse<object>
                     {
-                        Id = c.Id,
-                        CompanyId = c.CompanyId,
-                        Name = c.Name,
-                        CompanyNameBangla = c.CompanyNameBangla,
-                        City = c.City,
-                        Country = c.Country,
-                        IsActive = c.IsActive,
-                        CreatedAt = c.CreatedAt
-                    })
-                    .ToListAsync();
+                        Success = false,
+                        Message = "User not found",
+                        Errors = new List<string> { "User does not exist" }
+                    });
+                }
+
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var isAdmin = userRoles.Contains("Admin");
+
+                List<CompanyListDto> companies;
+
+                if (isAdmin)
+                {
+                    // Admin users can see all companies
+                    var query = _context.Companies.AsQueryable();
+
+                    if (!includeInactive)
+                    {
+                        query = query.Where(c => c.IsActive);
+                    }
+
+                    companies = await query
+                        .OrderBy(c => c.Name)
+                        .Select(c => new CompanyListDto
+                        {
+                            Id = c.Id,
+                            CompanyId = c.CompanyId,
+                            Name = c.Name,
+                            CompanyNameBangla = c.CompanyNameBangla,
+                            City = c.City,
+                            Country = c.Country,
+                            IsActive = c.IsActive,
+                            CreatedAt = c.CreatedAt
+                        })
+                        .ToListAsync();
+
+                    _logger.LogInformation("Admin user {UserId} retrieved all companies", userId);
+                }
+                else
+                {
+                    // Non-admin users can only see their assigned companies
+                    var userCompanyIds = new List<int>();
+
+                    // Get primary company (from CompanyId field)
+                    if (user.CompanyId.HasValue)
+                    {
+                        userCompanyIds.Add(user.CompanyId.Value);
+                    }
+
+                    // Get additional companies from UserCompany relationship
+                    var additionalCompanies = await _context.UserCompanies
+                        .Where(uc => uc.UserId == userId && uc.IsActive)
+                        .Select(uc => uc.CompanyId)
+                        .ToListAsync();
+
+                    userCompanyIds.AddRange(additionalCompanies);
+                    userCompanyIds = userCompanyIds.Distinct().ToList();
+
+                    if (!userCompanyIds.Any())
+                    {
+                        // User has no company assigned
+                        companies = new List<CompanyListDto>();
+                    }
+                    else
+                    {
+                        var query = _context.Companies
+                            .Where(c => userCompanyIds.Contains(c.Id) && c.IsActive);
+
+                        companies = await query
+                            .OrderBy(c => c.Name)
+                            .Select(c => new CompanyListDto
+                            {
+                                Id = c.Id,
+                                CompanyId = c.CompanyId,
+                                Name = c.Name,
+                                CompanyNameBangla = c.CompanyNameBangla,
+                                City = c.City,
+                                Country = c.Country,
+                                IsActive = c.IsActive,
+                                CreatedAt = c.CreatedAt
+                            })
+                            .ToListAsync();
+                    }
+
+                    _logger.LogInformation("User {UserId} retrieved {Count} assigned companies", userId, companies.Count);
+                }
 
                 return Ok(new ApiResponse<IEnumerable<CompanyListDto>>
                 {
                     Success = true,
-                    Message = "Companies retrieved successfully",
+                    Message = isAdmin ? "All companies retrieved successfully" : "Assigned companies retrieved successfully",
                     Data = companies
                 });
             }
