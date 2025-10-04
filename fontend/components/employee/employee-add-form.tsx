@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select"
 import { createEmployee, type CreateEmployeePayload } from "@/lib/api/employee"
 import { getAllDepartments, type Department } from "@/lib/api/department"
-import { getAllSections, type Section } from "@/lib/api/section"
-import { getAllDesignations, type Designation } from "@/lib/api/designation"
+import { getAllSections, getSectionsByDepartment, type Section } from "@/lib/api/section"
+import { getAllDesignations, getDesignationsBySection, type Designation } from "@/lib/api/designation"
 import { IconArrowLeft } from "@tabler/icons-react"
 
 const employeeSchema = z.object({
@@ -56,7 +56,11 @@ export function EmployeeAddForm() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [sections, setSections] = useState<Section[]>([])
   const [designations, setDesignations] = useState<Designation[]>([])
+  const [filteredSections, setFilteredSections] = useState<Section[]>([])
+  const [filteredDesignations, setFilteredDesignations] = useState<Designation[]>([])
   const [loadingData, setLoadingData] = useState(true)
+  const [loadingSections, setLoadingSections] = useState(false)
+  const [loadingDesignations, setLoadingDesignations] = useState(false)
   const router = useRouter()
 
   const form = useForm<EmployeeFormData>({
@@ -81,30 +85,18 @@ export function EmployeeAddForm() {
     },
   })
 
-  // Load departments, sections, and designations
+  // Load departments only initially
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [departmentsRes, sectionsRes, designationsRes] = await Promise.all([
-          getAllDepartments(),
-          getAllSections(),
-          getAllDesignations()
-        ])
+        const departmentsRes = await getAllDepartments()
         
         if (departmentsRes.success) {
           setDepartments(departmentsRes.data)
         }
-        
-        if (sectionsRes.success) {
-          setSections(sectionsRes.data)
-        }
-        
-        if (designationsRes.success) {
-          setDesignations(designationsRes.data)
-        }
       } catch (err) {
-        console.error('Error loading data:', err)
-        setError('Failed to load departments, sections, and designations')
+        console.error('Error loading departments:', err)
+        setError('Failed to load departments')
       } finally {
         setLoadingData(false)
       }
@@ -112,6 +104,56 @@ export function EmployeeAddForm() {
 
     loadData()
   }, [])
+
+  // Handle department change to load sections
+  const handleDepartmentChange = async (departmentId: number) => {
+    if (departmentId === 0) {
+      setFilteredSections([])
+      setFilteredDesignations([])
+      form.setValue('sectionId', 0)
+      form.setValue('designationId', 0)
+      return
+    }
+
+    setLoadingSections(true)
+    try {
+      const sectionsRes = await getSectionsByDepartment(departmentId)
+      if (sectionsRes.success) {
+        setFilteredSections(sectionsRes.data)
+        setFilteredDesignations([])
+        form.setValue('sectionId', 0)
+        form.setValue('designationId', 0)
+      }
+    } catch (err) {
+      console.error('Error loading sections:', err)
+      setError('Failed to load sections for selected department')
+    } finally {
+      setLoadingSections(false)
+    }
+  }
+
+  // Handle section change to load designations
+  const handleSectionChange = async (sectionId: number) => {
+    if (sectionId === 0) {
+      setFilteredDesignations([])
+      form.setValue('designationId', 0)
+      return
+    }
+
+    setLoadingDesignations(true)
+    try {
+      const designationsRes = await getDesignationsBySection(sectionId)
+      if (designationsRes.success) {
+        setFilteredDesignations(designationsRes.data)
+        form.setValue('designationId', 0)
+      }
+    } catch (err) {
+      console.error('Error loading designations:', err)
+      setError('Failed to load designations for selected section')
+    } finally {
+      setLoadingDesignations(false)
+    }
+  }
 
   const onSubmit = async (values: EmployeeFormData) => {
     setLoading(true)
@@ -374,7 +416,14 @@ export function EmployeeAddForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Department *</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value.toString()}>
+                        <Select 
+                          onValueChange={(value) => {
+                            const deptId = parseInt(value)
+                            field.onChange(deptId)
+                            handleDepartmentChange(deptId)
+                          }} 
+                          value={field.value.toString()}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select department" />
@@ -399,14 +448,28 @@ export function EmployeeAddForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Section *</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value.toString()}>
+                        <Select 
+                          onValueChange={(value) => {
+                            const sectionId = parseInt(value)
+                            field.onChange(sectionId)
+                            handleSectionChange(sectionId)
+                          }} 
+                          value={field.value.toString()}
+                          disabled={!form.watch('departmentId') || form.watch('departmentId') === 0 || loadingSections}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select section" />
+                              <SelectValue placeholder={
+                                !form.watch('departmentId') || form.watch('departmentId') === 0 
+                                  ? "Select department first" 
+                                  : loadingSections 
+                                    ? "Loading sections..." 
+                                    : "Select section"
+                              } />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {sections.map((section) => (
+                            {filteredSections.map((section) => (
                               <SelectItem key={section.id} value={section.id?.toString() || '0'}>
                                 {section.name}
                               </SelectItem>
@@ -424,14 +487,24 @@ export function EmployeeAddForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Designation *</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value.toString()}>
+                        <Select 
+                          onValueChange={(value) => field.onChange(parseInt(value))} 
+                          value={field.value.toString()}
+                          disabled={!form.watch('sectionId') || form.watch('sectionId') === 0 || loadingDesignations}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select designation" />
+                              <SelectValue placeholder={
+                                !form.watch('sectionId') || form.watch('sectionId') === 0 
+                                  ? "Select section first" 
+                                  : loadingDesignations 
+                                    ? "Loading designations..." 
+                                    : "Select designation"
+                              } />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {designations.map((designation) => (
+                            {filteredDesignations.map((designation) => (
                               <SelectItem key={designation.id} value={designation.id?.toString() || '0'}>
                                 {designation.name}
                               </SelectItem>

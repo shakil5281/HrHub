@@ -24,7 +24,7 @@ export interface DecodedToken {
   jti: string
   iss: string
   aud: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**

@@ -16,5 +16,8 @@ namespace HrHubAPI.Models
 
         // Navigation property for role users
         public virtual ICollection<IdentityUserRole<string>> UserRoles { get; set; } = new List<IdentityUserRole<string>>();
+        
+        // Navigation property for role permissions
+        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
 }

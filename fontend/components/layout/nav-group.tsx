@@ -21,69 +21,82 @@ import {
 import { useActiveLink, useActiveGroup } from "@/hooks/use-active-links"
 import Link from "next/link"
 
+interface NavItem {
+  title: string
+  url: string
+  icon?: React.ComponentType<{ className?: string }>
+  isActive?: boolean
+  items?: {
+    title: string
+    url: string
+  }[]
+}
+
+function NavGroupItem({ item }: { item: NavItem }) {
+  const isGroupActive = useActiveGroup(item.items || [])
+
+  return (
+    <Collapsible
+      asChild
+      defaultOpen={isGroupActive}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton
+            tooltip={item.title}
+            className={isGroupActive ? "" : ""}
+            isActive={isGroupActive}
+          >
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.items?.map((subItem) => {
+              return (
+                <NavSubItem key={subItem.title} subItem={subItem} />
+              )
+            })}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  )
+}
+
+function NavSubItem({ subItem }: { subItem: { title: string; url: string } }) {
+  const isSubItemActive = useActiveLink(subItem.url)
+
+  return (
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton
+        asChild
+        className={isSubItemActive ? "" : ""}
+        isActive={isSubItemActive}
+      >
+        <Link href={subItem.url}>
+          <span>{subItem.title}</span>
+        </Link>
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  )
+}
+
 export function NavGroup({
   items,
 }: {
-  items: {
-    title: string
-    url: string
-    icon?: React.ComponentType<any>
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+  items: NavItem[]
 }) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const isGroupActive = useActiveGroup(item.items || [])
-
           return (
-            <Collapsible
-              key={item.title}
-              asChild
-              defaultOpen={isGroupActive}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    className={isGroupActive ? "" : ""}
-                    isActive={isGroupActive}
-                  >
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items?.map((subItem) => {
-                      const isSubItemActive = useActiveLink(subItem.url)
-
-                      return (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            asChild
-                            className={isSubItemActive ? "" : ""}
-                            isActive={isSubItemActive}
-                          >
-                            <Link href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )
-                    })}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+            <NavGroupItem key={item.title} item={item} />
           )
         })}
       </SidebarMenu>

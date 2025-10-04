@@ -250,5 +250,6 @@ namespace HrHubAPI.DTOs
         public string Message { get; set; } = string.Empty;
         public T? Data { get; set; }
         public List<string> Errors { get; set; } = new();
+        public object? Meta { get; set; }
     }
 }

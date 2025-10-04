@@ -271,7 +271,7 @@ export function DesignationEditForm({ designationId }: DesignationEditFormProps)
                           {sections.map((section) => (
                             <SelectItem 
                               key={section.id} 
-                              value={section.id?.toString() || ''}
+                              value={section.id?.toString() || '0'}
                             >
                               <div>
                                 <div>{section.name}</div>

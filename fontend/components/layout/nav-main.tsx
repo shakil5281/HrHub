@@ -13,6 +13,21 @@ import {
 import { useActiveLink } from "@/hooks/use-active-links"
 import Link from "next/link"
 
+function NavMainItem({ item }: { item: { title: string; url: string; icon?: Icon } }) {
+  const isActive = useActiveLink(item.url)
+  
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
+        <Link href={item.url}>
+          {item.icon && <item.icon />}
+          <span>{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
 export function NavMain({
   items,
 }: {
@@ -46,17 +61,8 @@ export function NavMain({
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = useActiveLink(item.url)
-            
             return (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
-                  <Link href={item.url}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavMainItem key={item.title} item={item} />
             )
           })}
         </SidebarMenu>

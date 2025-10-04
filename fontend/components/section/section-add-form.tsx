@@ -181,7 +181,7 @@ export function SectionAddForm() {
                             {departments.map((department) => (
                               <SelectItem 
                                 key={department.id} 
-                                value={department.id?.toString() || ''}
+                                value={department.id?.toString() || '0'}
                               >
                                 {department.name}
                               </SelectItem>
