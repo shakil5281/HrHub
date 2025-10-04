@@ -70,6 +70,7 @@ namespace HrHubAPI.Models
         public string? UpdatedBy { get; set; }
 
         // Navigation Properties
-        public virtual ICollection<ApplicationUser> Employees { get; set; } = new List<ApplicationUser>();
+        public virtual ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+        public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

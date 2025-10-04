@@ -42,9 +42,13 @@ namespace HrHubAPI.Controllers
             try
             {
                 var query = _context.Employees
+                    .Include(e => e.Company)
                     .Include(e => e.Department)
                     .Include(e => e.Section)
                     .Include(e => e.Designation)
+                    .Include(e => e.Line)
+                    .Include(e => e.Shift)
+                    .Include(e => e.Degree)
                     .AsQueryable();
 
                 if (!includeInactive)
@@ -72,16 +76,29 @@ namespace HrHubAPI.Controllers
                     .Select(e => new EmployeeListDto
                     {
                         Id = e.Id,
+                        EmpId = e.EmpId,
                         Name = e.Name,
                         NameBangla = e.NameBangla,
                         NIDNo = e.NIDNo,
                         JoiningDate = e.JoiningDate,
+                        BloodGroup = e.BloodGroup,
+                        Gender = e.Gender,
+                        Religion = e.Religion,
+                        MaritalStatus = e.MaritalStatus,
+                        CompanyName = e.Company.Name,
                         DepartmentName = e.Department.Name,
                         SectionName = e.Section.Name,
                         DesignationName = e.Designation.Name,
                         DesignationGrade = e.Designation.Grade,
+                        LineName = e.Line != null ? e.Line.Name : null,
+                        ShiftName = e.Shift != null ? e.Shift.Name : null,
+                        Floor = e.Floor,
+                        EmpType = e.EmpType,
+                        Group = e.Group,
                         GrossSalary = e.GrossSalary,
                         BasicSalary = e.BasicSalary,
+                        SalaryType = e.SalaryType,
+                        Bank = e.Bank,
                         IsActive = e.IsActive,
                         CreatedAt = e.CreatedAt
                     })
@@ -122,13 +139,18 @@ namespace HrHubAPI.Controllers
             try
             {
                 var employee = await _context.Employees
+                    .Include(e => e.Company)
                     .Include(e => e.Department)
                     .Include(e => e.Section)
                     .Include(e => e.Designation)
+                    .Include(e => e.Line)
+                    .Include(e => e.Shift)
+                    .Include(e => e.Degree)
                     .Where(e => e.Id == id)
                     .Select(e => new EmployeeDto
                     {
                         Id = e.Id,
+                        EmpId = e.EmpId,
                         Name = e.Name,
                         NameBangla = e.NameBangla,
                         NIDNo = e.NIDNo,
@@ -137,8 +159,24 @@ namespace HrHubAPI.Controllers
                         FatherNameBangla = e.FatherNameBangla,
                         MotherNameBangla = e.MotherNameBangla,
                         DateOfBirth = e.DateOfBirth,
-                        Address = e.Address,
+                        PermanentAddress = e.PermanentAddress,
+                        PermanentDivision = e.PermanentDivision,
+                        PermanentDistrict = e.PermanentDistrict,
+                        PermanentUpazila = e.PermanentUpazila,
+                        PermanentPostalCode = e.PermanentPostalCode,
+                        PresentAddress = e.PresentAddress,
+                        PresentDivision = e.PresentDivision,
+                        PresentDistrict = e.PresentDistrict,
+                        PresentUpazila = e.PresentUpazila,
+                        PresentPostalCode = e.PresentPostalCode,
                         JoiningDate = e.JoiningDate,
+                        BloodGroup = e.BloodGroup,
+                        Gender = e.Gender,
+                        Religion = e.Religion,
+                        MaritalStatus = e.MaritalStatus,
+                        Education = e.Education,
+                        CompanyId = e.CompanyId,
+                        CompanyName = e.Company.Name,
                         DepartmentId = e.DepartmentId,
                         DepartmentName = e.Department.Name,
                         SectionId = e.SectionId,
@@ -146,9 +184,28 @@ namespace HrHubAPI.Controllers
                         DesignationId = e.DesignationId,
                         DesignationName = e.Designation.Name,
                         DesignationGrade = e.Designation.Grade,
+                        LineId = e.LineId,
+                        LineName = e.Line != null ? e.Line.Name : null,
+                        ShiftId = e.ShiftId,
+                        ShiftName = e.Shift != null ? e.Shift.Name : null,
+                        DegreeId = e.DegreeId,
+                        DegreeName = e.Degree != null ? e.Degree.Name : null,
+                        Floor = e.Floor,
+                        EmpType = e.EmpType,
+                        Group = e.Group,
+                        House = e.House,
+                        RentMedical = e.RentMedical,
+                        Food = e.Food,
+                        Conveyance = e.Conveyance,
+                        Transport = e.Transport,
+                        NightBill = e.NightBill,
+                        MobileBill = e.MobileBill,
+                        OtherAllowance = e.OtherAllowance,
                         GrossSalary = e.GrossSalary,
                         BasicSalary = e.BasicSalary,
+                        SalaryType = e.SalaryType,
                         BankAccountNo = e.BankAccountNo,
+                        Bank = e.Bank,
                         CreatedAt = e.CreatedAt,
                         UpdatedAt = e.UpdatedAt,
                         IsActive = e.IsActive,
@@ -202,11 +259,25 @@ namespace HrHubAPI.Controllers
         {
             try
             {
+                // Check if EmpId already exists
+                var existingEmployeeByEmpId = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.EmpId == model.EmpId);
+
+                if (existingEmployeeByEmpId != null)
+                {
+                    return Conflict(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Employee with this EmpId already exists",
+                        Errors = new List<string> { $"An employee with EmpId '{model.EmpId}' already exists" }
+                    });
+                }
+
                 // Check if NID already exists
-                var existingEmployee = await _context.Employees
+                var existingEmployeeByNID = await _context.Employees
                     .FirstOrDefaultAsync(e => e.NIDNo == model.NIDNo);
 
-                if (existingEmployee != null)
+                if (existingEmployeeByNID != null)
                 {
                     return Conflict(new ApiResponse<object>
                     {
@@ -216,16 +287,29 @@ namespace HrHubAPI.Controllers
                     });
                 }
 
+                // Validate company exists and is active
+                var company = await _context.Companies
+                    .FirstOrDefaultAsync(c => c.Id == model.CompanyId && c.IsActive);
+                if (company == null)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid company",
+                        Errors = new List<string> { $"Company with ID {model.CompanyId} not found or inactive" }
+                    });
+                }
+
                 // Validate department, section, and designation exist and are active
                 var department = await _context.Departments
-                    .FirstOrDefaultAsync(d => d.Id == model.DepartmentId && d.IsActive);
+                    .FirstOrDefaultAsync(d => d.Id == model.DepartmentId && d.IsActive && d.CompanyId == model.CompanyId);
                 if (department == null)
                 {
                     return BadRequest(new ApiResponse<object>
                     {
                         Success = false,
                         Message = "Invalid department",
-                        Errors = new List<string> { $"Department with ID {model.DepartmentId} not found or inactive" }
+                        Errors = new List<string> { $"Department with ID {model.DepartmentId} not found, inactive, or doesn't belong to the specified company" }
                     });
                 }
 
@@ -253,10 +337,57 @@ namespace HrHubAPI.Controllers
                     });
                 }
 
+                // Validate optional foreign keys if provided
+                if (model.LineId.HasValue)
+                {
+                    var line = await _context.Lines
+                        .FirstOrDefaultAsync(l => l.Id == model.LineId.Value && l.IsActive && l.CompanyId == model.CompanyId);
+                    if (line == null)
+                    {
+                        return BadRequest(new ApiResponse<object>
+                        {
+                            Success = false,
+                            Message = "Invalid line",
+                            Errors = new List<string> { $"Line with ID {model.LineId.Value} not found, inactive, or doesn't belong to the specified company" }
+                        });
+                    }
+                }
+
+                if (model.ShiftId.HasValue)
+                {
+                    var shift = await _context.Shifts
+                        .FirstOrDefaultAsync(s => s.Id == model.ShiftId.Value && s.IsActive && s.CompanyId == model.CompanyId);
+                    if (shift == null)
+                    {
+                        return BadRequest(new ApiResponse<object>
+                        {
+                            Success = false,
+                            Message = "Invalid shift",
+                            Errors = new List<string> { $"Shift with ID {model.ShiftId.Value} not found, inactive, or doesn't belong to the specified company" }
+                        });
+                    }
+                }
+
+                if (model.DegreeId.HasValue)
+                {
+                    var degree = await _context.Degrees
+                        .FirstOrDefaultAsync(d => d.Id == model.DegreeId.Value && d.IsActive && d.CompanyId == model.CompanyId);
+                    if (degree == null)
+                    {
+                        return BadRequest(new ApiResponse<object>
+                        {
+                            Success = false,
+                            Message = "Invalid degree",
+                            Errors = new List<string> { $"Degree with ID {model.DegreeId.Value} not found, inactive, or doesn't belong to the specified company" }
+                        });
+                    }
+                }
+
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 var employee = new Employee
                 {
+                    EmpId = model.EmpId,
                     Name = model.Name,
                     NameBangla = model.NameBangla,
                     NIDNo = model.NIDNo,
@@ -265,14 +396,45 @@ namespace HrHubAPI.Controllers
                     FatherNameBangla = model.FatherNameBangla,
                     MotherNameBangla = model.MotherNameBangla,
                     DateOfBirth = model.DateOfBirth,
-                    Address = model.Address,
+                    PermanentAddress = model.PermanentAddress,
+                    PermanentDivision = model.PermanentDivision,
+                    PermanentDistrict = model.PermanentDistrict,
+                    PermanentUpazila = model.PermanentUpazila,
+                    PermanentPostalCode = model.PermanentPostalCode,
+                    PresentAddress = model.PresentAddress,
+                    PresentDivision = model.PresentDivision,
+                    PresentDistrict = model.PresentDistrict,
+                    PresentUpazila = model.PresentUpazila,
+                    PresentPostalCode = model.PresentPostalCode,
                     JoiningDate = model.JoiningDate,
+                    BloodGroup = model.BloodGroup,
+                    Gender = model.Gender,
+                    Religion = model.Religion,
+                    MaritalStatus = model.MaritalStatus,
+                    Education = model.Education,
+                    CompanyId = model.CompanyId,
                     DepartmentId = model.DepartmentId,
                     SectionId = model.SectionId,
                     DesignationId = model.DesignationId,
+                    LineId = model.LineId,
+                    ShiftId = model.ShiftId,
+                    DegreeId = model.DegreeId,
+                    Floor = model.Floor,
+                    EmpType = model.EmpType,
+                    Group = model.Group,
+                    House = model.House,
+                    RentMedical = model.RentMedical,
+                    Food = model.Food,
+                    Conveyance = model.Conveyance,
+                    Transport = model.Transport,
+                    NightBill = model.NightBill,
+                    MobileBill = model.MobileBill,
+                    OtherAllowance = model.OtherAllowance,
                     GrossSalary = model.GrossSalary,
                     BasicSalary = model.BasicSalary,
+                    SalaryType = model.SalaryType,
                     BankAccountNo = model.BankAccountNo,
+                    Bank = model.Bank,
                     CreatedBy = currentUserId,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true
@@ -283,13 +445,18 @@ namespace HrHubAPI.Controllers
 
                 // Fetch the created employee with related data
                 var createdEmployee = await _context.Employees
+                    .Include(e => e.Company)
                     .Include(e => e.Department)
                     .Include(e => e.Section)
                     .Include(e => e.Designation)
+                    .Include(e => e.Line)
+                    .Include(e => e.Shift)
+                    .Include(e => e.Degree)
                     .Where(e => e.Id == employee.Id)
                     .Select(e => new EmployeeDto
                     {
                         Id = e.Id,
+                        EmpId = e.EmpId,
                         Name = e.Name,
                         NameBangla = e.NameBangla,
                         NIDNo = e.NIDNo,
@@ -298,8 +465,24 @@ namespace HrHubAPI.Controllers
                         FatherNameBangla = e.FatherNameBangla,
                         MotherNameBangla = e.MotherNameBangla,
                         DateOfBirth = e.DateOfBirth,
-                        Address = e.Address,
+                        PermanentAddress = e.PermanentAddress,
+                        PermanentDivision = e.PermanentDivision,
+                        PermanentDistrict = e.PermanentDistrict,
+                        PermanentUpazila = e.PermanentUpazila,
+                        PermanentPostalCode = e.PermanentPostalCode,
+                        PresentAddress = e.PresentAddress,
+                        PresentDivision = e.PresentDivision,
+                        PresentDistrict = e.PresentDistrict,
+                        PresentUpazila = e.PresentUpazila,
+                        PresentPostalCode = e.PresentPostalCode,
                         JoiningDate = e.JoiningDate,
+                        BloodGroup = e.BloodGroup,
+                        Gender = e.Gender,
+                        Religion = e.Religion,
+                        MaritalStatus = e.MaritalStatus,
+                        Education = e.Education,
+                        CompanyId = e.CompanyId,
+                        CompanyName = e.Company.Name,
                         DepartmentId = e.DepartmentId,
                         DepartmentName = e.Department.Name,
                         SectionId = e.SectionId,
@@ -307,9 +490,28 @@ namespace HrHubAPI.Controllers
                         DesignationId = e.DesignationId,
                         DesignationName = e.Designation.Name,
                         DesignationGrade = e.Designation.Grade,
+                        LineId = e.LineId,
+                        LineName = e.Line != null ? e.Line.Name : null,
+                        ShiftId = e.ShiftId,
+                        ShiftName = e.Shift != null ? e.Shift.Name : null,
+                        DegreeId = e.DegreeId,
+                        DegreeName = e.Degree != null ? e.Degree.Name : null,
+                        Floor = e.Floor,
+                        EmpType = e.EmpType,
+                        Group = e.Group,
+                        House = e.House,
+                        RentMedical = e.RentMedical,
+                        Food = e.Food,
+                        Conveyance = e.Conveyance,
+                        Transport = e.Transport,
+                        NightBill = e.NightBill,
+                        MobileBill = e.MobileBill,
+                        OtherAllowance = e.OtherAllowance,
                         GrossSalary = e.GrossSalary,
                         BasicSalary = e.BasicSalary,
+                        SalaryType = e.SalaryType,
                         BankAccountNo = e.BankAccountNo,
+                        Bank = e.Bank,
                         CreatedAt = e.CreatedAt,
                         UpdatedAt = e.UpdatedAt,
                         IsActive = e.IsActive,
@@ -366,11 +568,25 @@ namespace HrHubAPI.Controllers
                     });
                 }
 
+                // Check if EmpId already exists for another employee
+                var existingEmployeeByEmpId = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.EmpId == model.EmpId && e.Id != id);
+
+                if (existingEmployeeByEmpId != null)
+                {
+                    return Conflict(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Employee with this EmpId already exists",
+                        Errors = new List<string> { $"Another employee with EmpId '{model.EmpId}' already exists" }
+                    });
+                }
+
                 // Check if NID already exists for another employee
-                var existingEmployee = await _context.Employees
+                var existingEmployeeByNID = await _context.Employees
                     .FirstOrDefaultAsync(e => e.NIDNo == model.NIDNo && e.Id != id);
 
-                if (existingEmployee != null)
+                if (existingEmployeeByNID != null)
                 {
                     return Conflict(new ApiResponse<object>
                     {
@@ -380,16 +596,29 @@ namespace HrHubAPI.Controllers
                     });
                 }
 
+                // Validate company exists and is active
+                var company = await _context.Companies
+                    .FirstOrDefaultAsync(c => c.Id == model.CompanyId && c.IsActive);
+                if (company == null)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid company",
+                        Errors = new List<string> { $"Company with ID {model.CompanyId} not found or inactive" }
+                    });
+                }
+
                 // Validate department, section, and designation exist and are active
                 var department = await _context.Departments
-                    .FirstOrDefaultAsync(d => d.Id == model.DepartmentId && d.IsActive);
+                    .FirstOrDefaultAsync(d => d.Id == model.DepartmentId && d.IsActive && d.CompanyId == model.CompanyId);
                 if (department == null)
                 {
                     return BadRequest(new ApiResponse<object>
                     {
                         Success = false,
                         Message = "Invalid department",
-                        Errors = new List<string> { $"Department with ID {model.DepartmentId} not found or inactive" }
+                        Errors = new List<string> { $"Department with ID {model.DepartmentId} not found, inactive, or doesn't belong to the specified company" }
                     });
                 }
 
@@ -417,9 +646,56 @@ namespace HrHubAPI.Controllers
                     });
                 }
 
+                // Validate optional foreign keys if provided
+                if (model.LineId.HasValue)
+                {
+                    var line = await _context.Lines
+                        .FirstOrDefaultAsync(l => l.Id == model.LineId.Value && l.IsActive && l.CompanyId == model.CompanyId);
+                    if (line == null)
+                    {
+                        return BadRequest(new ApiResponse<object>
+                        {
+                            Success = false,
+                            Message = "Invalid line",
+                            Errors = new List<string> { $"Line with ID {model.LineId.Value} not found, inactive, or doesn't belong to the specified company" }
+                        });
+                    }
+                }
+
+                if (model.ShiftId.HasValue)
+                {
+                    var shift = await _context.Shifts
+                        .FirstOrDefaultAsync(s => s.Id == model.ShiftId.Value && s.IsActive && s.CompanyId == model.CompanyId);
+                    if (shift == null)
+                    {
+                        return BadRequest(new ApiResponse<object>
+                        {
+                            Success = false,
+                            Message = "Invalid shift",
+                            Errors = new List<string> { $"Shift with ID {model.ShiftId.Value} not found, inactive, or doesn't belong to the specified company" }
+                        });
+                    }
+                }
+
+                if (model.DegreeId.HasValue)
+                {
+                    var degree = await _context.Degrees
+                        .FirstOrDefaultAsync(d => d.Id == model.DegreeId.Value && d.IsActive && d.CompanyId == model.CompanyId);
+                    if (degree == null)
+                    {
+                        return BadRequest(new ApiResponse<object>
+                        {
+                            Success = false,
+                            Message = "Invalid degree",
+                            Errors = new List<string> { $"Degree with ID {model.DegreeId.Value} not found, inactive, or doesn't belong to the specified company" }
+                        });
+                    }
+                }
+
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 // Update employee properties
+                employee.EmpId = model.EmpId;
                 employee.Name = model.Name;
                 employee.NameBangla = model.NameBangla;
                 employee.NIDNo = model.NIDNo;
@@ -428,14 +704,45 @@ namespace HrHubAPI.Controllers
                 employee.FatherNameBangla = model.FatherNameBangla;
                 employee.MotherNameBangla = model.MotherNameBangla;
                 employee.DateOfBirth = model.DateOfBirth;
-                employee.Address = model.Address;
+                employee.PermanentAddress = model.PermanentAddress;
+                employee.PermanentDivision = model.PermanentDivision;
+                employee.PermanentDistrict = model.PermanentDistrict;
+                employee.PermanentUpazila = model.PermanentUpazila;
+                employee.PermanentPostalCode = model.PermanentPostalCode;
+                employee.PresentAddress = model.PresentAddress;
+                employee.PresentDivision = model.PresentDivision;
+                employee.PresentDistrict = model.PresentDistrict;
+                employee.PresentUpazila = model.PresentUpazila;
+                employee.PresentPostalCode = model.PresentPostalCode;
                 employee.JoiningDate = model.JoiningDate;
+                employee.BloodGroup = model.BloodGroup;
+                employee.Gender = model.Gender;
+                employee.Religion = model.Religion;
+                employee.MaritalStatus = model.MaritalStatus;
+                employee.Education = model.Education;
+                employee.CompanyId = model.CompanyId;
                 employee.DepartmentId = model.DepartmentId;
                 employee.SectionId = model.SectionId;
                 employee.DesignationId = model.DesignationId;
+                employee.LineId = model.LineId;
+                employee.ShiftId = model.ShiftId;
+                employee.DegreeId = model.DegreeId;
+                employee.Floor = model.Floor;
+                employee.EmpType = model.EmpType;
+                employee.Group = model.Group;
+                employee.House = model.House;
+                employee.RentMedical = model.RentMedical;
+                employee.Food = model.Food;
+                employee.Conveyance = model.Conveyance;
+                employee.Transport = model.Transport;
+                employee.NightBill = model.NightBill;
+                employee.MobileBill = model.MobileBill;
+                employee.OtherAllowance = model.OtherAllowance;
                 employee.GrossSalary = model.GrossSalary;
                 employee.BasicSalary = model.BasicSalary;
+                employee.SalaryType = model.SalaryType;
                 employee.BankAccountNo = model.BankAccountNo;
+                employee.Bank = model.Bank;
                 employee.IsActive = model.IsActive;
                 employee.UpdatedBy = currentUserId;
                 employee.UpdatedAt = DateTime.UtcNow;
@@ -444,13 +751,18 @@ namespace HrHubAPI.Controllers
 
                 // Fetch the updated employee with related data
                 var updatedEmployee = await _context.Employees
+                    .Include(e => e.Company)
                     .Include(e => e.Department)
                     .Include(e => e.Section)
                     .Include(e => e.Designation)
+                    .Include(e => e.Line)
+                    .Include(e => e.Shift)
+                    .Include(e => e.Degree)
                     .Where(e => e.Id == id)
                     .Select(e => new EmployeeDto
                     {
                         Id = e.Id,
+                        EmpId = e.EmpId,
                         Name = e.Name,
                         NameBangla = e.NameBangla,
                         NIDNo = e.NIDNo,
@@ -459,8 +771,24 @@ namespace HrHubAPI.Controllers
                         FatherNameBangla = e.FatherNameBangla,
                         MotherNameBangla = e.MotherNameBangla,
                         DateOfBirth = e.DateOfBirth,
-                        Address = e.Address,
+                        PermanentAddress = e.PermanentAddress,
+                        PermanentDivision = e.PermanentDivision,
+                        PermanentDistrict = e.PermanentDistrict,
+                        PermanentUpazila = e.PermanentUpazila,
+                        PermanentPostalCode = e.PermanentPostalCode,
+                        PresentAddress = e.PresentAddress,
+                        PresentDivision = e.PresentDivision,
+                        PresentDistrict = e.PresentDistrict,
+                        PresentUpazila = e.PresentUpazila,
+                        PresentPostalCode = e.PresentPostalCode,
                         JoiningDate = e.JoiningDate,
+                        BloodGroup = e.BloodGroup,
+                        Gender = e.Gender,
+                        Religion = e.Religion,
+                        MaritalStatus = e.MaritalStatus,
+                        Education = e.Education,
+                        CompanyId = e.CompanyId,
+                        CompanyName = e.Company.Name,
                         DepartmentId = e.DepartmentId,
                         DepartmentName = e.Department.Name,
                         SectionId = e.SectionId,
@@ -468,9 +796,28 @@ namespace HrHubAPI.Controllers
                         DesignationId = e.DesignationId,
                         DesignationName = e.Designation.Name,
                         DesignationGrade = e.Designation.Grade,
+                        LineId = e.LineId,
+                        LineName = e.Line != null ? e.Line.Name : null,
+                        ShiftId = e.ShiftId,
+                        ShiftName = e.Shift != null ? e.Shift.Name : null,
+                        DegreeId = e.DegreeId,
+                        DegreeName = e.Degree != null ? e.Degree.Name : null,
+                        Floor = e.Floor,
+                        EmpType = e.EmpType,
+                        Group = e.Group,
+                        House = e.House,
+                        RentMedical = e.RentMedical,
+                        Food = e.Food,
+                        Conveyance = e.Conveyance,
+                        Transport = e.Transport,
+                        NightBill = e.NightBill,
+                        MobileBill = e.MobileBill,
+                        OtherAllowance = e.OtherAllowance,
                         GrossSalary = e.GrossSalary,
                         BasicSalary = e.BasicSalary,
+                        SalaryType = e.SalaryType,
                         BankAccountNo = e.BankAccountNo,
+                        Bank = e.Bank,
                         CreatedAt = e.CreatedAt,
                         UpdatedAt = e.UpdatedAt,
                         IsActive = e.IsActive,
@@ -572,9 +919,12 @@ namespace HrHubAPI.Controllers
             try
             {
                 var query = _context.Employees
+                    .Include(e => e.Company)
                     .Include(e => e.Department)
                     .Include(e => e.Section)
                     .Include(e => e.Designation)
+                    .Include(e => e.Line)
+                    .Include(e => e.Shift)
                     .Where(e => e.IsActive)
                     .AsQueryable();
 
@@ -598,11 +948,15 @@ namespace HrHubAPI.Controllers
                     .Select(e => new EmployeeSummaryDto
                     {
                         Id = e.Id,
+                        EmpId = e.EmpId,
                         Name = e.Name,
                         NameBangla = e.NameBangla,
+                        CompanyName = e.Company.Name,
                         DepartmentName = e.Department.Name,
                         SectionName = e.Section.Name,
                         DesignationName = e.Designation.Name,
+                        LineName = e.Line != null ? e.Line.Name : null,
+                        ShiftName = e.Shift != null ? e.Shift.Name : null,
                         GrossSalary = e.GrossSalary,
                         IsActive = e.IsActive
                     })

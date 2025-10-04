@@ -181,7 +181,7 @@ export function DepartmentAddForm() {
                             {companies.map((company) => (
                               <SelectItem 
                                 key={company.id || company.companyId} 
-                                value={(company.id || company.companyId || '').toString()}
+                                value={(company.id || company.companyId || '0').toString()}
                               >
                                 {company.name}
                               </SelectItem>

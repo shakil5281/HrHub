@@ -63,8 +63,7 @@ export function LoginForm({
         // Also set token as cookie for middleware
         document.cookie = `token=${response.data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
 
-        console.log("Login successful:", response.message)
-        console.log("User:", response.data.user)
+        // Login successful
 
         // Check for redirect parameter
         const urlParams = new URLSearchParams(window.location.search)
@@ -79,11 +78,12 @@ export function LoginForm({
           setError(response.errors.join(", "))
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Handle API errors
-      const errorMessage = err?.response?.data?.message ||
-        err?.response?.data?.errors?.join(", ") ||
-        err?.message ||
+      const error = err as { response?: { data?: { message?: string; errors?: string[] } }; message?: string }
+      const errorMessage = error?.response?.data?.message ||
+        error?.response?.data?.errors?.join(", ") ||
+        error?.message ||
         "Login failed. Please try again."
       setError(errorMessage)
       console.error("Login error:", err)

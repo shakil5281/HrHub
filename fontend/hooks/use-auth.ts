@@ -24,32 +24,6 @@ export function useAuth(): UseAuthReturn {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [])
-
-  const checkAuthStatus = () => {
-    setIsLoading(true)
-    try {
-      const storedUser = getStoredUser()
-      const storedToken = getStoredToken()
-      const authenticated = isAuthenticated()
-
-      setUser(storedUser)
-      setToken(storedToken)
-      
-      if (!authenticated && storedToken) {
-        // Token exists but is expired, clear storage
-        logout()
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error)
-      logout()
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const logout = () => {
     setUser(null)
     setToken(null)
@@ -64,6 +38,32 @@ export function useAuth(): UseAuthReturn {
     
     router.push('/login')
   }
+
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      setIsLoading(true)
+      try {
+        const storedUser = getStoredUser()
+        const storedToken = getStoredToken()
+        const authenticated = isAuthenticated()
+
+        setUser(storedUser)
+        setToken(storedToken)
+        
+        if (!authenticated && storedToken) {
+          // Token exists but is expired, clear storage
+          logout()
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error)
+        logout()
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuthStatus()
+  }, [])
 
   const checkAuth = (): boolean => {
     return isAuthenticated()

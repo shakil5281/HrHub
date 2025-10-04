@@ -1,6 +1,7 @@
 using HrHubAPI.Data;
 using HrHubAPI.Models;
 using HrHubAPI.Services;
+using HrHubAPI.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +72,11 @@ builder.Services.AddAuthorization();
 
 // Register custom services
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IBackupService, BackupService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IDatabaseManagementService, DatabaseManagementService>();
+builder.Services.AddScoped<IImportExportService, ImportExportService>();
+builder.Services.AddScoped<IZkDeviceService, ZkDeviceService>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -155,6 +161,9 @@ app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add permission middleware
+app.UsePermissionMiddleware();
 
 app.MapControllers();
 

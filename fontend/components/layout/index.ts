@@ -15,6 +15,7 @@ import {
   IconSettings,
   IconUsers,
   IconBuilding,
+  IconShield,
 } from "@tabler/icons-react"
 
 export const data = {
@@ -107,6 +108,17 @@ export const data = {
         {
           title: "User Management",
           url: "/admin/users",
+        },
+      ],
+    },
+    {
+      title: "System Management",
+      url: "#",
+      icon: IconShield,
+      items: [
+        {
+          title: "Backup Management",
+          url: "/backup",
         },
       ],
     },
