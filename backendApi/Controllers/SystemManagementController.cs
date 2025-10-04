@@ -102,7 +102,7 @@ namespace HrHubAPI.Controllers
             {
                 var systemInfo = await _databaseService.GetSystemInfoAsync();
                 var databaseInfo = await _databaseService.GetDatabaseInfoAsync();
-                var backupStatus = await _backupService.GetBackupStatusAsync();
+                // var backupStatus = await _backupService.GetBackupStatusAsync();
 
                 var result = new SystemStatisticsResponse
                 {
@@ -114,8 +114,8 @@ namespace HrHubAPI.Controllers
                         DatabaseSizeBytes = databaseInfo.DatabaseSizeBytes,
                         DatabaseSizeFormatted = databaseInfo.DatabaseSizeFormatted,
                         ActiveConnections = 0, // Will be implemented in service
-                        TotalBackups = backupStatus.TotalBackups,
-                        LastBackupDate = backupStatus.LastBackupDate ?? DateTime.MinValue,
+                        TotalBackups = 0, // backupStatus.TotalBackups,
+                        LastBackupDate = DateTime.MinValue, // backupStatus.LastBackupDate ?? DateTime.MinValue,
                         RecordsByTable = databaseInfo.Tables.ToDictionary(t => t.TableName, t => (int)t.RowCount)
                     },
                     Application = new ApplicationStatistics

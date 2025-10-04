@@ -5,6 +5,7 @@ import { IconBuilding, IconUsers, IconTrendingUp, IconWorld } from "@tabler/icon
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { getCompanyStatistics, type CompanyStatistics } from "@/lib/api/company"
+import { formatNumber } from "@/lib/utils"
 
 export function CompanyStats() {
   const [statistics, setStatistics] = useState<CompanyStatistics | null>(null)
@@ -50,7 +51,7 @@ export function CompanyStats() {
     return null
   }
 
-  const topIndustries = Object.entries(statistics.companiesByIndustry)
+  const topIndustries = Object.entries(statistics.companiesByIndustry || {})
     .sort(([,a], [,b]) => b - a)
     .slice(0, 3)
 
@@ -64,7 +65,7 @@ export function CompanyStats() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statistics.totalCompanies.toLocaleString()}
+              {formatNumber(statistics.totalCompanies)}
             </div>
             <p className="text-xs text-muted-foreground">
               Active companies in system
@@ -79,7 +80,7 @@ export function CompanyStats() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statistics.totalEmployees.toLocaleString()}
+              {formatNumber(statistics.totalEmployees)}
             </div>
             <p className="text-xs text-muted-foreground">
               Across all companies
@@ -94,7 +95,7 @@ export function CompanyStats() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Math.round(statistics.averageEmployeeCount).toLocaleString()}
+              {formatNumber(Math.round(statistics.averageEmployeeCount))}
             </div>
             <p className="text-xs text-muted-foreground">
               Average employees per company
@@ -109,7 +110,7 @@ export function CompanyStats() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Object.keys(statistics.companiesByIndustry).length}
+              {Object.keys(statistics.companiesByIndustry || {}).length}
             </div>
             <p className="text-xs text-muted-foreground">
               Different industries

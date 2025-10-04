@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrHubAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251004041214_AddBangladeshAddressTable")]
-    partial class AddBangladeshAddressTable
+    [Migration("20251004162113_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,9 +68,9 @@ namespace HrHubAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5c0d8263-124a-455f-9ccc-34a2a0baaa8d",
-                            ConcurrencyStamp = "f3acce86-182a-423f-81b9-b8d20dac160a",
-                            CreatedAt = new DateTime(2025, 10, 4, 4, 12, 13, 996, DateTimeKind.Utc).AddTicks(7315),
+                            Id = "d98c6320-1a1d-4fce-8744-1982ea8e23f3",
+                            ConcurrencyStamp = "46588c84-79fc-4576-8ec3-dc11d5bf1ead",
+                            CreatedAt = new DateTime(2025, 10, 4, 16, 21, 13, 107, DateTimeKind.Utc).AddTicks(6773),
                             Description = "System Administrator with full access",
                             IsActive = true,
                             Name = "Admin",
@@ -78,9 +78,9 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "f6d16203-2ddd-401b-93d3-27ebf879dbbd",
-                            ConcurrencyStamp = "f282d601-30e5-431c-a49c-ad1b8392721c",
-                            CreatedAt = new DateTime(2025, 10, 4, 4, 12, 13, 996, DateTimeKind.Utc).AddTicks(7377),
+                            Id = "289c486d-d38a-4fca-97e1-51a8c3816402",
+                            ConcurrencyStamp = "041dd72c-d543-465e-a4e6-cef3e2066462",
+                            CreatedAt = new DateTime(2025, 10, 4, 16, 21, 13, 107, DateTimeKind.Utc).AddTicks(6782),
                             Description = "Manager with limited administrative access",
                             IsActive = true,
                             Name = "Manager",
@@ -88,9 +88,9 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "35449e5d-d913-49e2-a34a-9b642e9aaa23",
-                            ConcurrencyStamp = "4964b214-50b7-45d2-b2ca-e7e14c19ec8c",
-                            CreatedAt = new DateTime(2025, 10, 4, 4, 12, 13, 996, DateTimeKind.Utc).AddTicks(7387),
+                            Id = "8238ae47-4e66-4157-8bb4-9d12988bdbf2",
+                            ConcurrencyStamp = "b51218b9-7dbb-459b-b79a-4b1abc9a2b79",
+                            CreatedAt = new DateTime(2025, 10, 4, 16, 21, 13, 107, DateTimeKind.Utc).AddTicks(6789),
                             Description = "Regular employee with basic access",
                             IsActive = true,
                             Name = "Employee",
@@ -98,9 +98,9 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "c92dc3a2-246a-40de-ab87-28fbac473902",
-                            ConcurrencyStamp = "ec0dd5f5-44ef-4039-a883-c09bf5726082",
-                            CreatedAt = new DateTime(2025, 10, 4, 4, 12, 13, 996, DateTimeKind.Utc).AddTicks(7393),
+                            Id = "c66045ed-4b29-44a3-a6df-4600eca035cc",
+                            ConcurrencyStamp = "bd4d112d-3ea7-4040-978e-5f115d01edde",
+                            CreatedAt = new DateTime(2025, 10, 4, 16, 21, 13, 107, DateTimeKind.Utc).AddTicks(6796),
                             Description = "IT personnel with technical system access and user management capabilities",
                             IsActive = true,
                             Name = "IT",
@@ -108,9 +108,9 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "423a1ad8-837f-4b81-b855-c4bead6f4c9d",
-                            ConcurrencyStamp = "e5457540-04a4-41eb-ac5a-22f1fa2f0182",
-                            CreatedAt = new DateTime(2025, 10, 4, 4, 12, 13, 996, DateTimeKind.Utc).AddTicks(7399),
+                            Id = "2dedda21-353d-41c1-970e-8bfe2593a541",
+                            ConcurrencyStamp = "05d9c5b2-c0c7-4fca-b42b-1a8c88d4a817",
+                            CreatedAt = new DateTime(2025, 10, 4, 16, 21, 13, 107, DateTimeKind.Utc).AddTicks(6803),
                             Description = "HR personnel with employee management and company-wide HR operations access",
                             IsActive = true,
                             Name = "HR",
@@ -118,9 +118,9 @@ namespace HrHubAPI.Migrations
                         },
                         new
                         {
-                            Id = "cb63951f-32e7-43f6-a3c8-9c2f3ff9a159",
-                            ConcurrencyStamp = "b1207ce7-3aba-43ba-8c54-345bc183cf1e",
-                            CreatedAt = new DateTime(2025, 10, 4, 4, 12, 13, 996, DateTimeKind.Utc).AddTicks(7405),
+                            Id = "46730f41-5d1c-4f29-b726-cf7288ca579b",
+                            ConcurrencyStamp = "eaadd0a7-0f3d-4e9c-8324-0770653bc48d",
+                            CreatedAt = new DateTime(2025, 10, 4, 16, 21, 13, 107, DateTimeKind.Utc).AddTicks(6811),
                             Description = "Senior HR personnel with advanced HR management capabilities and strategic oversight",
                             IsActive = true,
                             Name = "HR Manager",
@@ -230,6 +230,80 @@ namespace HrHubAPI.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.AttendanceLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EmployeeName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LogTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LogType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Remarks")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("VerificationMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("WorkCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ZkDeviceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("LogTime");
+
+                    b.HasIndex("ZkDeviceId", "EmployeeId", "LogTime");
+
+                    b.ToTable("AttendanceLogs");
                 });
 
             modelBuilder.Entity("HrHubAPI.Models.BangladeshAddress", b =>
@@ -634,10 +708,9 @@ namespace HrHubAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<string>("Bank")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("BankAccountNo")
                         .IsRequired()
@@ -645,6 +718,16 @@ namespace HrHubAPI.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("BasicSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BloodGroup")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Conveyance")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -659,11 +742,27 @@ namespace HrHubAPI.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DegreeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<int>("DesignationId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Education")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("EmpId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EmpType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("FatherName")
                         .IsRequired()
@@ -674,7 +773,25 @@ namespace HrHubAPI.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Floor")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("Food")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<decimal>("GrossSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Group")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("House")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
@@ -682,6 +799,16 @@ namespace HrHubAPI.Migrations
 
                     b.Property<DateTime>("JoiningDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("LineId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MaritalStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("MobileBill")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("MotherName")
                         .IsRequired()
@@ -706,8 +833,81 @@ namespace HrHubAPI.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<decimal?>("NightBill")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("OtherAllowance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PermanentAddress")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PermanentDistrict")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PermanentDivision")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PermanentPostalCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PermanentUpazila")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PresentAddress")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PresentDistrict")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PresentDivision")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PresentPostalCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PresentUpazila")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Religion")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("RentMedical")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SalaryType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("ShiftId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Transport")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -718,22 +918,61 @@ namespace HrHubAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Bank");
+
                     b.HasIndex("BankAccountNo");
+
+                    b.HasIndex("BloodGroup");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DegreeId");
 
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("DesignationId");
 
+                    b.HasIndex("EmpId")
+                        .IsUnique();
+
+                    b.HasIndex("EmpType");
+
+                    b.HasIndex("Gender");
+
+                    b.HasIndex("Group");
+
                     b.HasIndex("IsActive");
 
                     b.HasIndex("JoiningDate");
+
+                    b.HasIndex("LineId");
+
+                    b.HasIndex("MaritalStatus");
 
                     b.HasIndex("NIDNo")
                         .IsUnique();
 
                     b.HasIndex("Name");
 
+                    b.HasIndex("PermanentDistrict");
+
+                    b.HasIndex("PermanentDivision");
+
+                    b.HasIndex("PermanentUpazila");
+
+                    b.HasIndex("PresentDistrict");
+
+                    b.HasIndex("PresentDivision");
+
+                    b.HasIndex("PresentUpazila");
+
+                    b.HasIndex("Religion");
+
+                    b.HasIndex("SalaryType");
+
                     b.HasIndex("SectionId");
+
+                    b.HasIndex("ShiftId");
 
                     b.ToTable("Employees");
                 });
@@ -790,6 +1029,186 @@ namespace HrHubAPI.Migrations
                         .HasDatabaseName("IX_Line_CompanyId_Name");
 
                     b.ToTable("Lines");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.Permission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PermissionGroupId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Resource")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Module");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("PermissionGroupId");
+
+                    b.HasIndex("Resource");
+
+                    b.HasIndex("Module", "Action")
+                        .HasDatabaseName("IX_Permission_Module_Action");
+
+                    b.HasIndex("Module", "Resource")
+                        .HasDatabaseName("IX_Permission_Module_Resource");
+
+                    b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.PermissionGroup", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Module");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("Module", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PermissionGroup_Module_Name");
+
+                    b.ToTable("PermissionGroups");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.RolePermission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ApplicationRoleId")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("AssignedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsGranted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PermissionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationRoleId");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("IsGranted");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("RoleId", "PermissionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RolePermission_RoleId_PermissionId");
+
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("HrHubAPI.Models.RosterSchedule", b =>
@@ -1055,6 +1474,196 @@ namespace HrHubAPI.Migrations
                     b.ToTable("UserCompanies");
                 });
 
+            modelBuilder.Entity("HrHubAPI.Models.UserPermission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("AssignedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsGranted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PermissionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("IsGranted");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "PermissionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserPermission_UserId_PermissionId");
+
+                    b.ToTable("UserPermissions");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.UserRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("AssignedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "RoleId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserRole_UserId_RoleId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.ZkDevice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdminCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DeviceName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("FcCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FpCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsConnected")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastConnectionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastLogDownloadTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("LogCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MachineNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("PasswordCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("UserCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IpAddress")
+                        .IsUnique();
+
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
+
+                    b.ToTable("ZkDevices");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -1184,10 +1793,21 @@ namespace HrHubAPI.Migrations
             modelBuilder.Entity("HrHubAPI.Models.ApplicationUser", b =>
                 {
                     b.HasOne("HrHubAPI.Models.Company", "Company")
-                        .WithMany("Employees")
+                        .WithMany("Users")
                         .HasForeignKey("CompanyId");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.AttendanceLog", b =>
+                {
+                    b.HasOne("HrHubAPI.Models.ZkDevice", "ZkDevice")
+                        .WithMany("AttendanceLogs")
+                        .HasForeignKey("ZkDeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ZkDevice");
                 });
 
             modelBuilder.Entity("HrHubAPI.Models.Degree", b =>
@@ -1225,6 +1845,17 @@ namespace HrHubAPI.Migrations
 
             modelBuilder.Entity("HrHubAPI.Models.Employee", b =>
                 {
+                    b.HasOne("HrHubAPI.Models.Company", "Company")
+                        .WithMany("Employees")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HrHubAPI.Models.Degree", "Degree")
+                        .WithMany()
+                        .HasForeignKey("DegreeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HrHubAPI.Models.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
@@ -1237,17 +1868,35 @@ namespace HrHubAPI.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HrHubAPI.Models.Line", "Line")
+                        .WithMany()
+                        .HasForeignKey("LineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HrHubAPI.Models.Section", "Section")
                         .WithMany()
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HrHubAPI.Models.Shift", "Shift")
+                        .WithMany()
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Degree");
+
                     b.Navigation("Department");
 
                     b.Navigation("Designation");
 
+                    b.Navigation("Line");
+
                     b.Navigation("Section");
+
+                    b.Navigation("Shift");
                 });
 
             modelBuilder.Entity("HrHubAPI.Models.Line", b =>
@@ -1259,6 +1908,36 @@ namespace HrHubAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.Permission", b =>
+                {
+                    b.HasOne("HrHubAPI.Models.PermissionGroup", null)
+                        .WithMany("Permissions")
+                        .HasForeignKey("PermissionGroupId");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.RolePermission", b =>
+                {
+                    b.HasOne("HrHubAPI.Models.ApplicationRole", null)
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("ApplicationRoleId");
+
+                    b.HasOne("HrHubAPI.Models.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HrHubAPI.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("HrHubAPI.Models.RosterSchedule", b =>
@@ -1329,6 +2008,44 @@ namespace HrHubAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("HrHubAPI.Models.UserPermission", b =>
+                {
+                    b.HasOne("HrHubAPI.Models.Permission", "Permission")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HrHubAPI.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.UserRole", b =>
+                {
+                    b.HasOne("HrHubAPI.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HrHubAPI.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("HrHubAPI.Models.ApplicationRole", null)
@@ -1390,6 +2107,8 @@ namespace HrHubAPI.Migrations
 
             modelBuilder.Entity("HrHubAPI.Models.ApplicationRole", b =>
                 {
+                    b.Navigation("RolePermissions");
+
                     b.Navigation("UserRoles");
                 });
 
@@ -1401,6 +2120,25 @@ namespace HrHubAPI.Migrations
             modelBuilder.Entity("HrHubAPI.Models.Company", b =>
                 {
                     b.Navigation("Employees");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("UserPermissions");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.PermissionGroup", b =>
+                {
+                    b.Navigation("Permissions");
+                });
+
+            modelBuilder.Entity("HrHubAPI.Models.ZkDevice", b =>
+                {
+                    b.Navigation("AttendanceLogs");
                 });
 #pragma warning restore 612, 618
         }

@@ -125,7 +125,7 @@ export default function AttendanceDevicesPage() {
   }
 
   const getStatusBadge = (device: AttendanceDevice) => {
-    if (!device.isOnline) {
+    if (!device.isConnected) {
       return <Badge variant="secondary">Offline</Badge>
     }
     
@@ -134,7 +134,7 @@ export default function AttendanceDevicesPage() {
   }
 
   const getConnectionIcon = (device: AttendanceDevice) => {
-    if (!device.isOnline) {
+    if (!device.isConnected) {
       return <IconWifiOff className="h-4 w-4 text-gray-400" />
     }
     
@@ -236,27 +236,27 @@ export default function AttendanceDevicesPage() {
               </TableHeader>
               <TableBody>
                 {devices.map((device) => (
-                  <TableRow key={device.deviceId}>
+                  <TableRow key={device.id}>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         {getConnectionIcon(device)}
                         <div>
                           <div className="font-medium">{device.deviceName}</div>
                           <div className="text-sm text-muted-foreground">
-                            ID: {device.deviceId}
+                            ID: {device.id}
                           </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{device.platform}</Badge>
+                      <Badge variant="outline">{device.productName}</Badge>
                     </TableCell>
                     <TableCell className="font-mono">{device.ipAddress}</TableCell>
                     <TableCell>{device.port}</TableCell>
                     <TableCell>{getStatusBadge(device)}</TableCell>
                     <TableCell>
-                      {device.lastSyncTime ? (
-                        new Date(device.lastSyncTime).toLocaleString()
+                      {device.lastLogDownloadTime ? (
+                        new Date(device.lastLogDownloadTime).toLocaleString()
                       ) : (
                         <span className="text-muted-foreground">Never</span>
                       )}
@@ -270,20 +270,20 @@ export default function AttendanceDevicesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => router.push(`/attendance/devices/${device.deviceId}/edit`)}
+                            onClick={() => router.push(`/attendance/devices/${device.id}/edit`)}
                           >
                             <IconEdit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleTestConnection(device.deviceId)}
-                            disabled={testingConnection === device.deviceId}
+                            onClick={() => handleTestConnection(device.id.toString())}
+                            disabled={testingConnection === device.id.toString()}
                           >
                             <IconWifi className="mr-2 h-4 w-4" />
-                            {testingConnection === device.deviceId ? "Testing..." : "Test Connection"}
+                            {testingConnection === device.id.toString() ? "Testing..." : "Test Connection"}
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeleteDevice(device.deviceId, device.deviceName)}
+                            onClick={() => handleDeleteDevice(device.id.toString(), device.deviceName)}
                             className="text-red-600"
                           >
                             <IconTrash className="mr-2 h-4 w-4" />

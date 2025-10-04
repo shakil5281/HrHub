@@ -1,7 +1,6 @@
 "use client"
 
 import { ChevronRight } from "lucide-react"
-import { type Icon } from "@tabler/icons-react"
 
 import {
   Collapsible,

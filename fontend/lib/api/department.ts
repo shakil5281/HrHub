@@ -1,13 +1,14 @@
 import api from '../axios'
 
 export interface Department {
-  id?: number
+  id: number
   name: string
   nameBangla: string
   companyId: number
-  companyName?: string
-  isActive?: boolean
-  createdAt?: string
+  companyName: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface DepartmentCreateRequest {

@@ -1,13 +1,14 @@
 import api from '../axios'
 
 export interface Section {
-  id?: number
+  id: number
   departmentId: number
-  departmentName?: string
+  departmentName: string
   name: string
   nameBangla: string
-  isActive?: boolean
-  createdAt?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SectionCreateRequest {

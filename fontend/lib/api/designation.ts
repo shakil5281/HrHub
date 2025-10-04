@@ -1,16 +1,17 @@
 import api from '../axios'
 
 export interface Designation {
-  id?: number
+  id: number
   sectionId: number
-  sectionName?: string
-  departmentName?: string
+  sectionName: string
+  departmentName: string
   name: string
   nameBangla: string
   grade: string
   attendanceBonus: number
-  isActive?: boolean
-  createdAt?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface DesignationCreateRequest {

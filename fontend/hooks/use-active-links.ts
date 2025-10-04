@@ -2,6 +2,7 @@ import { usePathname } from 'next/navigation'
 
 /**
  * Hook to determine if a link is active based on the current pathname
+ * This ensures only the most specific (deepest) match is active
  * @param href - The href of the link to check
  * @param exact - Whether to match exactly or allow partial matches
  * @returns boolean indicating if the link is active
@@ -13,9 +14,9 @@ export function useActiveLink(href: string, exact: boolean = false): boolean {
     return pathname === href
   }
   
-  // For partial matches, check if the pathname starts with the href
-  // This handles nested routes like /admin/users/add being active when /admin/users is the parent
-  return pathname.startsWith(href)
+  // Only exact matches are considered active
+  // This prevents parent paths from being active when child paths are active
+  return pathname === href
 }
 
 /**
@@ -28,8 +29,8 @@ export function useActiveGroup(items: { url: string }[]): boolean {
   const pathname = usePathname()
   
   return items.some(item => {
-    // Check if any sub-item is active
-    return pathname.startsWith(item.url)
+    // Only exact matches are considered active
+    return pathname === item.url
   })
 }
 

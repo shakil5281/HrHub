@@ -8,20 +8,17 @@ import { Badge } from "@/components/ui/badge"
 import { 
   getAttendanceStatistics,
   getDeviceStatus,
-  getDeviceStatistics,
   type AttendanceStatistics,
   type DeviceStatus 
 } from "@/lib/api/attendance"
+import { formatDate } from "@/lib/utils"
 import { 
-  IconUsers, 
   IconDeviceDesktop, 
   IconClock, 
   IconActivity,
   IconRefresh,
   IconWifi,
   IconWifiOff,
-  IconBattery,
-  IconSignalE,
   IconAlertCircle,
   IconCheck,
   IconX,
@@ -30,12 +27,10 @@ import {
   IconDownload,
   IconFileText
 } from "@tabler/icons-react"
-import { toast } from "sonner"
 
 export default function AttendanceDashboardPage() {
   const [statistics, setStatistics] = useState<AttendanceStatistics | null>(null)
   const [deviceStatuses, setDeviceStatuses] = useState<DeviceStatus[]>([])
-  const [autoSyncStatus, setAutoSyncStatus] = useState<{ isRunning: boolean; lastRun?: string; nextRun?: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -58,9 +53,6 @@ export default function AttendanceDashboardPage() {
         setDeviceStatuses(devicesResponse.data)
       }
       
-      if (autoSyncResponse.success) {
-        setAutoSyncStatus(autoSyncResponse.data)
-      }
     } catch (err) {
       console.error('Error loading dashboard data:', err)
       setError('Failed to load dashboard data')
@@ -210,7 +202,7 @@ export default function AttendanceDashboardPage() {
               <IconDeviceDesktop className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.TotalDevices}</div>
+              <div className="text-2xl font-bold">{statistics?.TotalDevices || 0}</div>
               <p className="text-xs text-muted-foreground">
                 Registered devices
               </p>
@@ -223,7 +215,7 @@ export default function AttendanceDashboardPage() {
               <IconClock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.TotalLogs}</div>
+              <div className="text-2xl font-bold">{statistics?.TotalLogs || 0}</div>
               <p className="text-xs text-muted-foreground">
                 Total attendance records
               </p>
@@ -236,7 +228,7 @@ export default function AttendanceDashboardPage() {
               <IconActivity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.TotalSyncLogs}</div>
+              <div className="text-2xl font-bold">{statistics?.TotalSyncLogs || 0}</div>
               <p className="text-xs text-muted-foreground">
                 Total sync operations
               </p>
@@ -250,11 +242,11 @@ export default function AttendanceDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                {getSyncStatusBadge(statistics.LastSyncTime === "0001-01-01T00:00:00" ? "IDLE" : "SYNCING")}
+                {getSyncStatusBadge(statistics?.LastSyncTime === "0001-01-01T00:00:00" ? "IDLE" : "SYNCING")}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {statistics.LastSyncTime && statistics.LastSyncTime !== "0001-01-01T00:00:00" ? 
-                  `Last sync: ${new Date(statistics.LastSyncTime).toLocaleString()}` :
+                {statistics?.LastSyncTime && statistics.LastSyncTime !== "0001-01-01T00:00:00" ? 
+                  `Last sync: ${formatDate(statistics.LastSyncTime)}` :
                   'No recent sync'
                 }
               </p>
@@ -263,54 +255,6 @@ export default function AttendanceDashboardPage() {
         </div>
       )}
 
-      {/* Auto Sync Status */}
-      {autoSyncStatus && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <IconActivity className="mr-2 h-5 w-5" />
-              Auto Sync Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium">Status:</span>
-                  {autoSyncStatus.isRunning ? (
-                    <Badge variant="default" className="bg-green-100 text-green-800">
-                      <IconCheck className="mr-1 h-3 w-3" />
-                      Running
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">
-                      <IconX className="mr-1 h-3 w-3" />
-                      Stopped
-                    </Badge>
-                  )}
-                </div>
-                {autoSyncStatus.lastRun && (
-                  <div className="text-sm text-muted-foreground">
-                    Last run: {new Date(autoSyncStatus.lastRun).toLocaleString()}
-                  </div>
-                )}
-                {autoSyncStatus.nextRun && (
-                  <div className="text-sm text-muted-foreground">
-                    Next run: {new Date(autoSyncStatus.nextRun).toLocaleString()}
-                  </div>
-                )}
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => router.push('/attendance/sync')}
-              >
-                Manage Sync
-                <IconArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Device Status Summary */}
       <Card>
@@ -320,11 +264,11 @@ export default function AttendanceDashboardPage() {
             Device Status Summary
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Status is updated periodically. Use "Test Connection" in device management for real-time connectivity check.
+            Status is updated periodically. Use &quot;Test Connection&quot; in device management for real-time connectivity check.
           </p>
         </CardHeader>
         <CardContent>
-          {deviceStatuses.length === 0 ? (
+          {!deviceStatuses || deviceStatuses.length === 0 ? (
             <div className="text-center py-8">
               <IconDeviceDesktop className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold mb-2">No devices found</h3>
@@ -337,15 +281,15 @@ export default function AttendanceDashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {deviceStatuses.slice(0, 6).map((device) => (
-                <div key={device.deviceId} className="border rounded-lg p-4">
+              {(deviceStatuses || []).slice(0, 6).map((device) => (
+                <div key={device.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
                       <IconDeviceDesktop className="h-4 w-4 text-gray-400" />
                       <div>
                         <div className="font-medium">{device.deviceName}</div>
                         <div className="text-sm text-muted-foreground">
-                          ID: {device.deviceId}
+                          ID: {device.id}
                         </div>
                       </div>
                     </div>
@@ -360,21 +304,21 @@ export default function AttendanceDashboardPage() {
                     
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Total Logs:</span>
-                      <span>{device.totalLogs}</span>
+                      <span>{device.logCount}</span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Pending Logs:</span>
-                      <span className={device.pendingLogs > 0 ? "text-orange-600" : "text-green-600"}>
-                        {device.pendingLogs}
+                      <span className={device.userCount > 0 ? "text-orange-600" : "text-green-600"}>
+                        {device.userCount}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Last Sync:</span>
                       <span className="text-xs">
-                        {device.lastSyncTime && device.lastSyncTime !== "0001-01-01T00:00:00" ? 
-                          new Date(device.lastSyncTime).toLocaleDateString() :
+                        {device.lastLogDownloadTime && device.lastLogDownloadTime !== "0001-01-01T00:00:00" ? 
+                          new Date(device.lastLogDownloadTime).toLocaleDateString() :
                           'Never'
                         }
                       </span>

@@ -35,7 +35,6 @@ import {
   type AttendanceDevice 
 } from "@/lib/api/attendance"
 import { 
-  IconPlus, 
   IconDots, 
   IconTrash, 
   IconRefresh,
@@ -80,7 +79,7 @@ export default function AttendanceLogsPage() {
         deviceId?: string;
         startDate?: string;
         endDate?: string;
-        logType?: string;
+        logType?: "IN" | "OUT";
       } = {
         page,
         pageSize,
@@ -90,7 +89,7 @@ export default function AttendanceLogsPage() {
       if (filters.deviceId && filters.deviceId !== 'all') params.deviceId = filters.deviceId
       if (filters.startDate) params.startDate = filters.startDate
       if (filters.endDate) params.endDate = filters.endDate
-      if (filters.logType && filters.logType !== 'all') params.logType = filters.logType
+      if (filters.logType && filters.logType !== 'all') params.logType = filters.logType as "IN" | "OUT"
       
       const response = await getAttendanceLogs(params)
       if (response.success) {
@@ -261,7 +260,7 @@ export default function AttendanceLogsPage() {
                 <SelectContent>
                   <SelectItem value="all">All devices</SelectItem>
                   {devices.map((device) => (
-                    <SelectItem key={device.deviceId} value={device.deviceId}>
+                    <SelectItem key={device.id} value={device.id.toString()}>
                       {device.deviceName}
                     </SelectItem>
                   ))}

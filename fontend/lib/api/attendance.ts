@@ -176,7 +176,7 @@ export const updateAttendanceDevice = async (deviceId: string, device: Attendanc
 }
 
 export const deleteAttendanceDevice = async (deviceId: string): Promise<{ success: boolean; message: string; errors: string[] }> => {
-  const response = await api.delete(`/ZkDevice/devices/${deviceId}`)
+  await api.delete(`/ZkDevice/devices/${deviceId}`)
   return {
     success: true,
     message: 'Device deleted successfully',
@@ -220,12 +220,22 @@ export const downloadAllDeviceLogs = async (): Promise<{ success: boolean; messa
 }
 
 export const getDeviceStatus = async (): Promise<DeviceStatusResponse> => {
-  const response = await api.get<DeviceStatus[]>('/ZkDevice/statistics/devices')
-  return {
-    success: true,
-    message: 'Device status retrieved successfully',
-    data: response.data,
-    errors: []
+  try {
+    const response = await api.get<DeviceStatus[]>('/ZkDevice/statistics/devices')
+    return {
+      success: true,
+      message: 'Device status retrieved successfully',
+      data: Array.isArray(response.data) ? response.data : [],
+      errors: []
+    }
+  } catch (error) {
+    console.error('Error fetching device status:', error)
+    return {
+      success: false,
+      message: 'Failed to fetch device status',
+      data: [],
+      errors: ['Failed to fetch device status']
+    }
   }
 }
 
@@ -261,12 +271,28 @@ export const markLogAsProcessed = async (logId: number): Promise<{ success: bool
 
 // Statistics
 export const getAttendanceStatistics = async (): Promise<AttendanceStatisticsResponse> => {
-  const response = await api.get<AttendanceStatistics>('/ZkDevice/statistics/logs')
-  return {
-    success: true,
-    message: 'Statistics retrieved successfully',
-    data: response.data,
-    errors: []
+  try {
+    const response = await api.get<AttendanceStatistics>('/ZkDevice/statistics/logs')
+    return {
+      success: true,
+      message: 'Statistics retrieved successfully',
+      data: response.data,
+      errors: []
+    }
+  } catch (error) {
+    console.error('Error fetching attendance statistics:', error)
+    return {
+      success: false,
+      message: 'Failed to fetch statistics',
+      data: {
+        TotalDevices: 0,
+        TotalLogs: 0,
+        TotalSyncLogs: 0,
+        LastSyncTime: "0001-01-01T00:00:00",
+        DatabaseSize: 0
+      },
+      errors: ['Failed to fetch statistics']
+    }
   }
 }
 

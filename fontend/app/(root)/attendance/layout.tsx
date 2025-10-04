@@ -1,5 +1,3 @@
-import { AttendanceNav } from "@/components/attendance/attendance-nav"
-
 export default function AttendanceLayout({
   children,
 }: {
@@ -7,9 +5,6 @@ export default function AttendanceLayout({
 }) {
   return (
     <div className="space-y-6">
-      <div className="border-b">
-        <AttendanceNav />
-      </div>
       {children}
     </div>
   )

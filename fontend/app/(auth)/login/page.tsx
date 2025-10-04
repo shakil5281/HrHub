@@ -1,5 +1,4 @@
 import { LoginForm } from "@/components/form/login-form"
-import { Card } from "@/components/ui/card"
 
 export default function Page() {
   return (

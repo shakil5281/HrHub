@@ -13,9 +13,7 @@ import {
 import { 
   IconDownload, 
   IconRefresh, 
-  IconDeviceDesktop,
-  IconCheck,
-  IconX
+  IconDeviceDesktop
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 

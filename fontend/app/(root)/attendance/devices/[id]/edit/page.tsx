@@ -34,13 +34,16 @@ import { IconArrowLeft, IconDeviceDesktop, IconWifi } from "@tabler/icons-react"
 import { toast } from "sonner"
 
 const deviceSchema = z.object({
-  name: z.string().min(1, "Device name is required"),
+  deviceName: z.string().min(1, "Device name is required"),
   ipAddress: z.string().min(1, "IP address is required").regex(
     /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
     "Invalid IP address format"
   ),
   port: z.number().min(1, "Port must be greater than 0").max(65535, "Port must be less than 65536"),
-  deviceType: z.string().min(1, "Device type is required"),
+  serialNumber: z.string().optional(),
+  productName: z.string().min(1, "Product name is required"),
+  machineNumber: z.string().optional(),
+  location: z.string().optional(),
   isActive: z.boolean(),
 })
 
@@ -71,10 +74,13 @@ export default function EditAttendanceDevicePage({ params }: EditDevicePageProps
   const form = useForm<DeviceFormData>({
     resolver: zodResolver(deviceSchema),
     defaultValues: {
-      name: "",
+      deviceName: "",
       ipAddress: "",
       port: 4370,
-      deviceType: "",
+      serialNumber: "",
+      productName: "",
+      machineNumber: "",
+      location: "",
       isActive: true,
     },
   })
@@ -90,11 +96,14 @@ export default function EditAttendanceDevicePage({ params }: EditDevicePageProps
           setDevice(deviceData)
           
           form.reset({
-            name: deviceData.deviceName,
+            deviceName: deviceData.deviceName,
             ipAddress: deviceData.ipAddress,
             port: deviceData.port,
-            deviceType: deviceData.platform,
-            isActive: deviceData.isOnline,
+            serialNumber: deviceData.serialNumber || "",
+            productName: deviceData.productName || "ZKTeco",
+            machineNumber: deviceData.machineNumber || "",
+            location: deviceData.location || "",
+            isActive: deviceData.isActive,
           })
         } else {
           setError(response.message || 'Failed to load device')
@@ -116,10 +125,14 @@ export default function EditAttendanceDevicePage({ params }: EditDevicePageProps
 
     try {
       const deviceData: AttendanceDeviceUpdateRequest = {
-        deviceName: values.name,
+        deviceName: values.deviceName,
         ipAddress: values.ipAddress,
         port: values.port,
-        location: device?.location || '',
+        serialNumber: values.serialNumber,
+        productName: values.productName,
+        machineNumber: values.machineNumber,
+        location: values.location,
+        isActive: values.isActive,
       }
 
       const response = await updateAttendanceDevice(params.id, deviceData)

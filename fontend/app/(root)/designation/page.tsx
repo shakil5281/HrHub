@@ -102,7 +102,7 @@ export default function DesignationPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : averageBonus.toFixed(0)}
+              {loading ? "..." : (averageBonus || 0).toFixed(0)}
             </div>
             <p className="text-xs text-muted-foreground">
               Average attendance bonus
@@ -132,7 +132,7 @@ export default function DesignationPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : new Set(designations.map(d => d.sectionId)).size.toLocaleString()}
+              {loading ? "..." : new Set((designations || []).map(d => d.sectionId)).size.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
               Sections with designations

@@ -1,7 +1,7 @@
 import api from '../axios'
 
 export interface Company {
-  companyId?: string
+  id: number
   name: string
   companyNameBangla: string
   description: string
@@ -15,10 +15,9 @@ export interface Company {
   country: string
   logoUrl: string
   authorizedSignature: string
-  // Legacy fields for backward compatibility
-  id?: string
-  createdAt?: string
-  updatedAt?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CompanyResponse {
@@ -62,19 +61,19 @@ export const createCompany = async (company: Omit<Company, 'id' | 'createdAt' | 
 }
 
 // Get company by ID (Admin only)
-export const getCompanyById = async (id: string): Promise<CompanyResponse> => {
+export const getCompanyById = async (id: number): Promise<CompanyResponse> => {
   const response = await api.get<CompanyResponse>(`/Company/${id}`)
   return response.data
 }
 
 // Update an existing company (Admin only)
-export const updateCompany = async (id: string, company: Partial<Company>): Promise<CompanyResponse> => {
+export const updateCompany = async (id: number, company: Partial<Company>): Promise<CompanyResponse> => {
   const response = await api.put<CompanyResponse>(`/Company/${id}`, company)
   return response.data
 }
 
 // Delete a company (Admin only)
-export const deleteCompany = async (id: string): Promise<{ success: boolean; message: string }> => {
+export const deleteCompany = async (id: number): Promise<{ success: boolean; message: string; errors: string[] }> => {
   const response = await api.delete(`/Company/${id}`)
   return response.data
 }

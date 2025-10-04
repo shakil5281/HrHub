@@ -7,7 +7,6 @@ import {
   IconTrash,
   IconEye,
   IconBuilding,
-  IconCode,
   IconStar,
 } from "@tabler/icons-react"
 import {

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { UserTable } from "@/components/user/user-table"
 import { getAllUsers, getUserStatistics, type User, type UserStatistics } from "@/lib/api/user"
+import { formatNumber } from "@/lib/utils"
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -63,7 +64,7 @@ export default function UsersPage() {
   // Use API statistics if available, fallback to local calculation
   const totalUsers = statistics?.totalUsers || users.length
   const activeUsers = statistics?.activeUsers || users.filter(u => u.isActive).length
-  const uniqueCompanies = statistics && statistics.usersByCompany ? 
+  const uniqueCompanies = statistics?.usersByCompany ? 
     Object.keys(statistics.usersByCompany).length : 
     Object.keys(users.reduce((acc, user) => {
       if (user.companyName) {
@@ -71,7 +72,7 @@ export default function UsersPage() {
       }
       return acc
     }, {} as Record<string, number>)).length
-  const uniqueDepartments = statistics && statistics.usersByDepartment ? 
+  const uniqueDepartments = statistics?.usersByDepartment ?
     Object.keys(statistics.usersByDepartment).length :
     Object.keys(users.reduce((acc, user) => {
       if (user.department) {
@@ -111,7 +112,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : totalUsers.toLocaleString()}
+              {loading ? "..." : formatNumber(totalUsers)}
             </div>
             <p className="text-xs text-muted-foreground">
               {activeUsers} active, {totalUsers - activeUsers} inactive
@@ -126,7 +127,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : uniqueCompanies.toLocaleString()}
+              {loading ? "..." : formatNumber(uniqueCompanies)}
             </div>
             <p className="text-xs text-muted-foreground">
               Companies with users
@@ -141,7 +142,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : uniqueDepartments.toLocaleString()}
+              {loading ? "..." : formatNumber(uniqueDepartments)}
             </div>
             <p className="text-xs text-muted-foreground">
               Active departments

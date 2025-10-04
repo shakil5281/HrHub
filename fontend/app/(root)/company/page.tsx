@@ -38,10 +38,7 @@ export default function CompanyPage() {
   }
 
   const handleEdit = (company: Company) => {
-    const id = company.id || company.companyId
-    if (id) {
-      router.push(`/company/${id}/edit`)
-    }
+    router.push(`/company/${company.id}/edit`)
   }
 
   const filteredCompanies = companies.filter(company =>

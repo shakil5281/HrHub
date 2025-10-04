@@ -16,6 +16,28 @@ import {
   IconUsers,
   IconBuilding,
   IconShield,
+  IconDeviceDesktop,
+  IconFileText,
+  IconDownload,
+  IconActivity,
+  IconReportAnalytics,
+  IconKey,
+  IconServer,
+  IconClock,
+  IconCalendar,
+  IconTrendingUp,
+  IconCircleCheck,
+  IconCircleX,
+  IconAlertCircle,
+  IconUser,
+  IconChartBar as IconBarChart,
+  IconWifi,
+  IconWifiOff,
+  IconEdit,
+  IconTrash,
+  IconEye,
+  IconStar,
+  IconBriefcase
 } from "@tabler/icons-react"
 
 export const data = {
@@ -25,16 +47,11 @@ export const data = {
       url: "/dashboard",
       icon: IconDashboard,
     },
-    {
-      title: "Companies",
-      url: "/company",
-      icon: IconBuilding,
-    }
   ],
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/admin/system",
       icon: IconSettings,
     },
     {
@@ -49,43 +66,26 @@ export const data = {
     },
   ],
   navGroup: [
-
     {
       title: "Company Management",
-      url: "#",
-      icon: IconDatabase,
-      items: [
-        {
-          title: "Company list",
-          url: "/company",
-        },
-        {
-          title: "Department",
-          url: "/department",
-        },
-        {
-          title: "Section",
-          url: "/section",
-        },
-        {
-          title: "Designation",
-          url: "/designation",
-        },
-
-      ],
-    },
-    {
-      title: "Data collection",
       url: "#",
       icon: IconBuilding,
       items: [
         {
-          title: "Collect data",
-          url: "/data-collection",
+          title: "Companies",
+          url: "/company",
         },
         {
-          title: "Daily Progress",
-          url: "/daily-progress",
+          title: "Departments",
+          url: "/department",
+        },
+        {
+          title: "Sections",
+          url: "/section",
+        },
+        {
+          title: "Designations",
+          url: "/designation",
         },
       ],
     },
@@ -95,26 +95,85 @@ export const data = {
       icon: IconUsers,
       items: [
         {
-          title: "Employee List",
+          title: "Employees",
           url: "/employee",
         },
       ],
     },
     {
-      title: "Administrator",
+      title: "Attendance Management",
       url: "#",
-      icon: IconReport,
+      icon: IconClock,
       items: [
         {
-          title: "User Management",
-          url: "/admin/users",
+          title: "Dashboard",
+          url: "/attendance",
+        },
+        {
+          title: "Devices",
+          url: "/attendance/devices",
+        },
+        {
+          title: "Logs",
+          url: "/attendance/logs",
+        },
+        {
+          title: "Sync & Download",
+          url: "/attendance/sync",
+        },
+        {
+          title: "Statistics",
+          url: "/attendance/statistics",
+        },
+        {
+          title: "Reports",
+          url: "/attendance/reports",
+        },
+        {
+          title: "Daily Reports",
+          url: "/attendance/reports/daily",
+        },
+        {
+          title: "Employee Reports",
+          url: "/attendance/reports/employee",
+        },
+        {
+          title: "Summary Reports",
+          url: "/attendance/reports/summary",
         },
       ],
     },
     {
-      title: "System Management",
+      title: "Administration",
       url: "#",
       icon: IconShield,
+      items: [
+        {
+          title: "Admin Dashboard",
+          url: "/admin",
+        },
+        {
+          title: "User Management",
+          url: "/admin/users",
+        },
+        {
+          title: "Permissions",
+          url: "/admin/permissions",
+        },
+        {
+          title: "Roles",
+          url: "/admin/roles",
+        },
+        {
+          title: "System Management",
+          url: "/admin/system",
+        },
+      ],
+    },
+    {
+      title: "System Tools",
+      url: "#",
+      icon: IconDatabase,
       items: [
         {
           title: "Backup Management",
