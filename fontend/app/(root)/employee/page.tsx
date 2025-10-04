@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { EmployeeTable } from "@/components/employee/employee-table"
-import { getAllEmployees, getEmployeeSummary, type Employee } from "@/lib/api/employee"
+import { getAllEmployees, type Employee } from "@/lib/api/employee"
 
 export default function EmployeePage() {
   const [employees, setEmployees] = useState<Employee[]>([])

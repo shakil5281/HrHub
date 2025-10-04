@@ -7,10 +7,9 @@ import {
   IconDashboard, 
   IconDeviceDesktop, 
   IconFileText, 
-  IconRefresh, 
   IconDownload, 
   IconActivity,
-  IconSettings
+  IconReportAnalytics
 } from "@tabler/icons-react"
 
 const navigation = [
@@ -38,6 +37,11 @@ const navigation = [
     name: "Statistics",
     href: "/attendance/statistics",
     icon: IconActivity,
+  },
+  {
+    name: "Reports",
+    href: "/attendance/reports",
+    icon: IconReportAnalytics,
   },
 ]
 

@@ -29,14 +29,16 @@ import { IconArrowLeft, IconDeviceDesktop, IconWifi } from "@tabler/icons-react"
 import { toast } from "sonner"
 
 const deviceSchema = z.object({
-  name: z.string().min(1, "Device name is required"),
+  deviceName: z.string().min(1, "Device name is required"),
   ipAddress: z.string().min(1, "IP address is required").regex(
     /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
     "Invalid IP address format"
   ),
   port: z.number().min(1, "Port must be greater than 0").max(65535, "Port must be less than 65536"),
-  deviceType: z.string().min(1, "Device type is required"),
-  isActive: z.boolean(),
+  serialNumber: z.string().optional(),
+  productName: z.string().min(1, "Product name is required"),
+  machineNumber: z.string().optional(),
+  location: z.string().optional(),
 })
 
 type DeviceFormData = z.infer<typeof deviceSchema>
@@ -58,11 +60,13 @@ export default function NewAttendanceDevicePage() {
   const form = useForm<DeviceFormData>({
     resolver: zodResolver(deviceSchema),
     defaultValues: {
-      name: "",
+      deviceName: "",
       ipAddress: "",
       port: 4370,
-      deviceType: "",
-      isActive: true,
+      serialNumber: "",
+      productName: "",
+      machineNumber: "",
+      location: "",
     },
   })
 
@@ -72,11 +76,13 @@ export default function NewAttendanceDevicePage() {
 
     try {
       const deviceData: AttendanceDeviceCreateRequest = {
-        name: values.name,
+        deviceName: values.deviceName,
         ipAddress: values.ipAddress,
         port: values.port,
-        deviceType: values.deviceType,
-        isActive: values.isActive,
+        serialNumber: values.serialNumber || "",
+        productName: values.productName,
+        machineNumber: values.machineNumber || "",
+        location: values.location || "",
       }
 
       const response = await createAttendanceDevice(deviceData)
@@ -152,14 +158,14 @@ export default function NewAttendanceDevicePage() {
 
                   <FormField
                     control={form.control}
-                    name="deviceType"
+                    name="productName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Device Type *</FormLabel>
+                        <FormLabel>Product Name *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select device type" />
+                              <SelectValue placeholder="Select product name" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -170,6 +176,48 @@ export default function NewAttendanceDevicePage() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="serialNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Serial Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter serial number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="machineNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Machine Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter machine number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter device location" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -221,34 +269,6 @@ export default function NewAttendanceDevicePage() {
                     )}
                   />
                 </div>
-              </div>
-
-              {/* Status Configuration */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Status Configuration</h3>
-                
-                <FormField
-                  control={form.control}
-                  name="isActive"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Active Device
-                        </FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          Enable this device to start collecting attendance data
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
               </div>
 
               {error && (

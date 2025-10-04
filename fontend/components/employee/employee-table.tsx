@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { format } from "date-fns"
+import { formatCurrency } from "@/lib/utils"
 import {
   IconEdit,
   IconTrash,
@@ -10,8 +11,6 @@ import {
   IconBuilding,
   IconBriefcase,
   IconCash,
-  IconToggleLeft,
-  IconToggleRight,
 } from "@tabler/icons-react"
 import {
   Table,
@@ -40,7 +39,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { deleteEmployee, type Employee } from "@/lib/api/employee"
@@ -139,16 +138,24 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                 <TableCell>
                   <div className="space-y-1">
                     <div className="text-sm">
+                      <span className="font-medium">Emp ID:</span> {employee.empId || 'N/A'}
+                    </div>
+                    <div className="text-sm">
                       <span className="font-medium">NID:</span> {employee.nidNo || 'N/A'}
                     </div>
+                    {employee.gender && (
+                      <div className="text-sm text-gray-500">
+                        <span className="font-medium">Gender:</span> {employee.gender}
+                      </div>
+                    )}
+                    {employee.bloodGroup && (
+                      <div className="text-sm text-gray-500">
+                        <span className="font-medium">Blood:</span> {employee.bloodGroup}
+                      </div>
+                    )}
                     {employee.dateOfBirth && (
                       <div className="text-sm text-gray-500">
                         DOB: {format(new Date(employee.dateOfBirth), 'dd/MM/yyyy')}
-                      </div>
-                    )}
-                    {employee.fatherName && (
-                      <div className="text-sm text-gray-500">
-                        Father: {employee.fatherName || 'N/A'}
                       </div>
                     )}
                   </div>
@@ -166,6 +173,16 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                       <IconBriefcase className="h-3 w-3 mr-1" />
                       {employee.designationName || 'N/A'}
                     </div>
+                    {employee.empType && (
+                      <div className="text-sm text-gray-500">
+                        Type: {employee.empType}
+                      </div>
+                    )}
+                    {employee.floor && (
+                      <div className="text-sm text-gray-500">
+                        Floor: {employee.floor}
+                      </div>
+                    )}
                     {employee.joiningDate && (
                       <div className="text-sm text-gray-500">
                         Joined: {format(new Date(employee.joiningDate), 'dd/MM/yyyy')}
@@ -177,11 +194,21 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                   <div className="space-y-1">
                     <div className="flex items-center text-sm">
                       <IconCash className="h-3 w-3 mr-1" />
-                      <span className="font-medium">৳{employee.grossSalary?.toLocaleString() || 0}</span>
+                      <span className="font-medium">{formatCurrency(employee.grossSalary || 0)}</span>
                     </div>
                     <div className="text-sm text-gray-500">
-                      Basic: ৳{employee.basicSalary?.toLocaleString() || 0}
+                      Basic: {formatCurrency(employee.basicSalary || 0)}
                     </div>
+                    {employee.salaryType && (
+                      <div className="text-sm text-gray-500">
+                        Type: {employee.salaryType}
+                      </div>
+                    )}
+                    {(employee.house || employee.food || employee.conveyance) && (
+                      <div className="text-sm text-gray-500">
+                        Allowances: {formatCurrency((employee.house || 0) + (employee.food || 0) + (employee.conveyance || 0))}
+                      </div>
+                    )}
                     {employee.bankAccountNo && (
                       <div className="text-sm text-gray-500">
                         Account: {employee.bankAccountNo}
@@ -247,7 +274,7 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                   {viewEmployee.nameBangla && (
                     <div className="text-blue-600 text-sm font-sutonnymj">{viewEmployee.nameBangla}</div>
                   )}
-                  <div className="text-sm text-gray-500">Employee ID: {viewEmployee.id}</div>
+                  <div className="text-sm text-gray-500">Employee ID: {viewEmployee.empId || viewEmployee.id}</div>
                 </div>
               </AlertDialogTitle>
             </AlertDialogHeader>
@@ -260,11 +287,16 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                   <div className="space-y-2 text-sm">
                     <div><strong>Name:</strong> {viewEmployee.name || 'N/A'}</div>
                     <div><strong>Name (Bangla):</strong> {viewEmployee.nameBangla || 'N/A'}</div>
+                    <div><strong>Employee ID:</strong> {viewEmployee.empId || 'N/A'}</div>
                     <div><strong>NID:</strong> {viewEmployee.nidNo || 'N/A'}</div>
                     <div><strong>Father:</strong> {viewEmployee.fatherName || 'N/A'}</div>
                     <div><strong>Mother:</strong> {viewEmployee.motherName || 'N/A'}</div>
                     <div><strong>DOB:</strong> {viewEmployee.dateOfBirth ? format(new Date(viewEmployee.dateOfBirth), 'PPP') : 'N/A'}</div>
-                    <div><strong>Address:</strong> {viewEmployee.address || 'N/A'}</div>
+                    <div><strong>Gender:</strong> {viewEmployee.gender || 'N/A'}</div>
+                    <div><strong>Blood Group:</strong> {viewEmployee.bloodGroup || 'N/A'}</div>
+                    <div><strong>Religion:</strong> {viewEmployee.religion || 'N/A'}</div>
+                    <div><strong>Marital Status:</strong> {viewEmployee.maritalStatus || 'N/A'}</div>
+                    <div><strong>Education:</strong> {viewEmployee.education || 'N/A'}</div>
                   </div>
                 </div>
 
@@ -276,8 +308,10 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                     <div><strong>Section:</strong> {viewEmployee.sectionName || 'N/A'}</div>
                     <div><strong>Designation:</strong> {viewEmployee.designationName || 'N/A'}</div>
                     <div><strong>Grade:</strong> {viewEmployee.designationGrade || 'N/A'}</div>
+                    <div><strong>Employee Type:</strong> {viewEmployee.empType || 'N/A'}</div>
+                    <div><strong>Floor:</strong> {viewEmployee.floor || 'N/A'}</div>
+                    <div><strong>Group:</strong> {viewEmployee.group || 'N/A'}</div>
                     <div><strong>Joining Date:</strong> {viewEmployee.joiningDate ? format(new Date(viewEmployee.joiningDate), 'PPP') : 'N/A'}</div>
-                    <div><strong>Bank Account:</strong> {viewEmployee.bankAccountNo || 'N/A'}</div>
                   </div>
                 </div>
 
@@ -285,8 +319,19 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
                 <div>
                   <h4 className="font-semibold mb-3">Salary Information</h4>
                   <div className="space-y-2 text-sm">
-                    <div><strong>Gross Salary:</strong> ৳{viewEmployee.grossSalary?.toLocaleString() || 0}</div>
-                    <div><strong>Basic Salary:</strong> ৳{viewEmployee.basicSalary?.toLocaleString() || 0}</div>
+                    <div><strong>Gross Salary:</strong> {formatCurrency(viewEmployee.grossSalary || 0)}</div>
+                    <div><strong>Basic Salary:</strong> {formatCurrency(viewEmployee.basicSalary || 0)}</div>
+                    <div><strong>Salary Type:</strong> {viewEmployee.salaryType || 'N/A'}</div>
+                    <div><strong>House Allowance:</strong> {formatCurrency(viewEmployee.house || 0)}</div>
+                    <div><strong>Rent & Medical:</strong> {formatCurrency(viewEmployee.rentMedical || 0)}</div>
+                    <div><strong>Food Allowance:</strong> {formatCurrency(viewEmployee.food || 0)}</div>
+                    <div><strong>Conveyance:</strong> {formatCurrency(viewEmployee.conveyance || 0)}</div>
+                    <div><strong>Transport:</strong> {formatCurrency(viewEmployee.transport || 0)}</div>
+                    <div><strong>Night Bill:</strong> {formatCurrency(viewEmployee.nightBill || 0)}</div>
+                    <div><strong>Mobile Bill:</strong> {formatCurrency(viewEmployee.mobileBill || 0)}</div>
+                    <div><strong>Other Allowance:</strong> {formatCurrency(viewEmployee.otherAllowance || 0)}</div>
+                    <div><strong>Bank Account:</strong> {viewEmployee.bankAccountNo || 'N/A'}</div>
+                    <div><strong>Bank:</strong> {viewEmployee.bank || 'N/A'}</div>
                     <div><strong>Status:</strong> 
                       <Badge variant={viewEmployee.isActive ? "default" : "secondary"} className="ml-2">
                         {viewEmployee.isActive ? "Active" : "Inactive"}
@@ -297,8 +342,18 @@ export function EmployeeTable({ employees, loading, onEdit, onRefresh }: Employe
 
                 {/* Additional Information */}
                 <div>
-                  <h4 className="font-semibold mb-3">Additional Information</h4>
+                  <h4 className="font-semibold mb-3">Address Information</h4>
                   <div className="space-y-2 text-sm">
+                    <div><strong>Permanent Address:</strong> {viewEmployee.permanentAddress || 'N/A'}</div>
+                    <div><strong>Permanent Division:</strong> {viewEmployee.permanentDivision || 'N/A'}</div>
+                    <div><strong>Permanent District:</strong> {viewEmployee.permanentDistrict || 'N/A'}</div>
+                    <div><strong>Permanent Upazila:</strong> {viewEmployee.permanentUpazila || 'N/A'}</div>
+                    <div><strong>Permanent Postal Code:</strong> {viewEmployee.permanentPostalCode || 'N/A'}</div>
+                    <div><strong>Present Address:</strong> {viewEmployee.presentAddress || 'N/A'}</div>
+                    <div><strong>Present Division:</strong> {viewEmployee.presentDivision || 'N/A'}</div>
+                    <div><strong>Present District:</strong> {viewEmployee.presentDistrict || 'N/A'}</div>
+                    <div><strong>Present Upazila:</strong> {viewEmployee.presentUpazila || 'N/A'}</div>
+                    <div><strong>Present Postal Code:</strong> {viewEmployee.presentPostalCode || 'N/A'}</div>
                     <div><strong>Father (Bangla):</strong> {viewEmployee.fatherNameBangla || 'N/A'}</div>
                     <div><strong>Mother (Bangla):</strong> {viewEmployee.motherNameBangla || 'N/A'}</div>
                     <div><strong>Created:</strong> {format(new Date(viewEmployee.createdAt), 'PPP')}</div>

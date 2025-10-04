@@ -17,14 +17,14 @@ export interface RegisterPayload {
 }
 
 export interface User {
-  id: string
+  id: number
   email: string
   firstName: string
   lastName: string
   department: string
   position: string
-  companyId: string | null
-  companyName: string | null
+  companyId: number
+  companyName: string
   roles: string[]
 }
 

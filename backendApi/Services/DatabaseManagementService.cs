@@ -31,7 +31,6 @@ namespace HrHubAPI.Services
         {
             try
             {
-                var tables = await GetTableInfoAsync();
                 var databaseName = GetDatabaseName();
                 var serverName = GetServerName();
 
@@ -40,17 +39,17 @@ namespace HrHubAPI.Services
                     DatabaseName = databaseName,
                     ServerName = serverName,
                     Provider = "SQL Server",
-                    Version = await GetDatabaseVersionAsync(),
-                    DatabaseSizeBytes = await GetDatabaseSizeAsync(),
-                    DatabaseSizeFormatted = FormatBytes(await GetDatabaseSizeAsync()),
-                    TableCount = tables.Count,
-                    IndexCount = tables.Sum(t => t.IndexCount),
-                    StoredProcedureCount = await GetStoredProcedureCountAsync(),
-                    FunctionCount = await GetFunctionCountAsync(),
-                    LastBackupDate = await GetLastBackupDateAsync(),
-                    IsOnline = await IsDatabaseOnlineAsync(),
-                    Collation = await GetDatabaseCollationAsync(),
-                    Tables = tables
+                    Version = "Unknown",
+                    DatabaseSizeBytes = 0,
+                    DatabaseSizeFormatted = "0 B",
+                    TableCount = 0,
+                    IndexCount = 0,
+                    StoredProcedureCount = 0,
+                    FunctionCount = 0,
+                    LastBackupDate = DateTime.MinValue,
+                    IsOnline = true,
+                    Collation = "Unknown",
+                    Tables = new List<TableInfo>()
                 };
             }
             catch (Exception ex)
@@ -66,22 +65,17 @@ namespace HrHubAPI.Services
             {
                 var query = @"
                     SELECT 
-                        t.TABLE_NAME as TableName,
-                        t.TABLE_SCHEMA as Schema,
-                        p.rows as RowCount,
-                        SUM(a.total_pages) * 8 * 1024 as SizeBytes,
-                        COUNT(c.COLUMN_NAME) as ColumnCount,
-                        COUNT(i.name) as IndexCount,
-                        t.CREATE_DATE as CreatedDate,
-                        t.MODIFY_DATE as ModifiedDate
-                    FROM INFORMATION_SCHEMA.TABLES t
-                    LEFT JOIN sys.partitions p ON OBJECT_ID(t.TABLE_SCHEMA + '.' + t.TABLE_NAME) = p.object_id
-                    LEFT JOIN sys.allocation_units a ON p.partition_id = a.container_id
-                    LEFT JOIN INFORMATION_SCHEMA.COLUMNS c ON t.TABLE_NAME = c.TABLE_NAME AND t.TABLE_SCHEMA = c.TABLE_SCHEMA
-                    LEFT JOIN sys.indexes i ON OBJECT_ID(t.TABLE_SCHEMA + '.' + t.TABLE_NAME) = i.object_id
-                    WHERE t.TABLE_TYPE = 'BASE TABLE'
-                    GROUP BY t.TABLE_NAME, t.TABLE_SCHEMA, p.rows, t.CREATE_DATE, t.MODIFY_DATE
-                    ORDER BY t.TABLE_NAME";
+                        TABLE_NAME as TableName,
+                        TABLE_SCHEMA as Schema,
+                        0 as RowCount,
+                        0 as SizeBytes,
+                        0 as ColumnCount,
+                        0 as IndexCount,
+                        GETDATE() as CreatedDate,
+                        NULL as ModifiedDate
+                    FROM INFORMATION_SCHEMA.TABLES 
+                    WHERE TABLE_TYPE = 'BASE TABLE'
+                    ORDER BY TABLE_NAME";
 
                 var results = new List<TableInfo>();
                 using var connection = new SqlConnection(_connectionString);
@@ -92,14 +86,13 @@ namespace HrHubAPI.Services
                 
                 while (await reader.ReadAsync())
                 {
-                    var sizeBytes = reader["SizeBytes"] as long? ?? 0;
                     results.Add(new TableInfo
                     {
                         TableName = reader["TableName"].ToString()!,
                         Schema = reader["Schema"].ToString()!,
                         RowCount = (int)(reader["RowCount"] as long? ?? 0),
-                        SizeBytes = sizeBytes,
-                        SizeFormatted = FormatBytes(sizeBytes),
+                        SizeBytes = reader["SizeBytes"] as long? ?? 0,
+                        SizeFormatted = FormatBytes(reader["SizeBytes"] as long? ?? 0),
                         ColumnCount = reader["ColumnCount"] as int? ?? 0,
                         IndexCount = reader["IndexCount"] as int? ?? 0,
                         CreatedDate = reader["CreatedDate"] as DateTime? ?? DateTime.MinValue,

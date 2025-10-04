@@ -2,6 +2,7 @@ import api from '../axios'
 
 export interface Employee {
   id: number
+  empId: string
   name: string
   nameBangla: string
   nidNo: string
@@ -10,20 +11,55 @@ export interface Employee {
   fatherNameBangla?: string
   motherNameBangla?: string
   dateOfBirth?: string
-  address?: string
+  permanentAddress?: string
+  permanentDivision?: string
+  permanentDistrict?: string
+  permanentUpazila?: string
+  permanentPostalCode?: string
+  presentAddress?: string
+  presentDivision?: string
+  presentDistrict?: string
+  presentUpazila?: string
+  presentPostalCode?: string
   joiningDate: string
+  bloodGroup?: string
+  gender?: string
+  religion?: string
+  maritalStatus?: string
+  education?: string
+  companyId: number
+  departmentId: number
+  sectionId: number
+  designationId: number
+  lineId?: number
+  shiftId?: number
+  degreeId?: number
+  floor?: string
+  empType?: string
+  group?: string
+  house?: number
+  rentMedical?: number
+  food?: number
+  conveyance?: number
+  transport?: number
+  nightBill?: number
+  mobileBill?: number
+  otherAllowance?: number
+  grossSalary: number
+  basicSalary: number
+  salaryType?: string
+  bankAccountNo?: string
+  bank?: string
   departmentName: string
   sectionName: string
   designationName: string
   designationGrade: string
-  grossSalary: number
-  basicSalary: number
-  bankAccountNo?: string
   isActive: boolean
   createdAt: string
 }
 
 export interface CreateEmployeePayload {
+  empId: string
   name: string
   nameBangla: string
   nidNo: string
@@ -32,17 +68,49 @@ export interface CreateEmployeePayload {
   fatherNameBangla?: string
   motherNameBangla?: string
   dateOfBirth?: string
-  address?: string
+  permanentAddress?: string
+  permanentDivision?: string
+  permanentDistrict?: string
+  permanentUpazila?: string
+  permanentPostalCode?: string
+  presentAddress?: string
+  presentDivision?: string
+  presentDistrict?: string
+  presentUpazila?: string
+  presentPostalCode?: string
   joiningDate: string
+  bloodGroup?: string
+  gender?: string
+  religion?: string
+  maritalStatus?: string
+  education?: string
+  companyId: number
   departmentId: number
   sectionId: number
   designationId: number
+  lineId?: number
+  shiftId?: number
+  degreeId?: number
+  floor?: string
+  empType?: string
+  group?: string
+  house?: number
+  rentMedical?: number
+  food?: number
+  conveyance?: number
+  transport?: number
+  nightBill?: number
+  mobileBill?: number
+  otherAllowance?: number
   grossSalary: number
   basicSalary: number
+  salaryType?: string
   bankAccountNo?: string
+  bank?: string
 }
 
 export interface UpdateEmployeePayload {
+  empId?: string
   name?: string
   nameBangla?: string
   nidNo?: string
@@ -51,14 +119,45 @@ export interface UpdateEmployeePayload {
   fatherNameBangla?: string
   motherNameBangla?: string
   dateOfBirth?: string
-  address?: string
+  permanentAddress?: string
+  permanentDivision?: string
+  permanentDistrict?: string
+  permanentUpazila?: string
+  permanentPostalCode?: string
+  presentAddress?: string
+  presentDivision?: string
+  presentDistrict?: string
+  presentUpazila?: string
+  presentPostalCode?: string
   joiningDate?: string
+  bloodGroup?: string
+  gender?: string
+  religion?: string
+  maritalStatus?: string
+  education?: string
+  companyId?: number
   departmentId?: number
   sectionId?: number
   designationId?: number
+  lineId?: number
+  shiftId?: number
+  degreeId?: number
+  floor?: string
+  empType?: string
+  group?: string
+  house?: number
+  rentMedical?: number
+  food?: number
+  conveyance?: number
+  transport?: number
+  nightBill?: number
+  mobileBill?: number
+  otherAllowance?: number
   grossSalary?: number
   basicSalary?: number
+  salaryType?: string
   bankAccountNo?: string
+  bank?: string
 }
 
 export interface EmployeeResponse {

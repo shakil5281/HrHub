@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { login, type LoginResponse } from "@/lib/api/auth"
-import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2, Chrome } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),

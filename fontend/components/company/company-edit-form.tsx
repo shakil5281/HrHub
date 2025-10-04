@@ -122,12 +122,7 @@ export function CompanyEditForm({ companyId }: CompanyEditFormProps) {
         logoUrl: values.logoUrl || "",
       }
 
-      const id = company.id || company.companyId
-      if (!id) {
-        throw new Error("Company ID not found")
-      }
-
-      await updateCompany(id, companyData)
+      await updateCompany(company.id, companyData)
       router.push("/company")
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string; errors?: string[] } }; message?: string }

@@ -77,6 +77,7 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IDatabaseManagementService, DatabaseManagementService>();
 builder.Services.AddScoped<IImportExportService, ImportExportService>();
 builder.Services.AddScoped<IZkDeviceService, ZkDeviceService>();
+builder.Services.AddScoped<IAttendanceReportService, AttendanceReportService>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -177,8 +178,8 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
         
-        // Only create database if it doesn't exist (preserves existing data)
-        context.Database.EnsureCreated();
+        // Apply migrations to ensure database is up to date
+        context.Database.Migrate();
         
         // Seed default admin user (only if doesn't exist)
         await SeedDefaultUsers(userManager, roleManager);

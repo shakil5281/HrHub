@@ -10,21 +10,17 @@ import {
   type AttendanceStatistics,
   type DeviceStatus 
 } from "@/lib/api/attendance"
+import { formatNumber, formatDate } from "@/lib/utils"
 import { 
-  IconUsers, 
   IconDeviceDesktop, 
   IconClock, 
   IconActivity,
   IconRefresh,
   IconWifi,
   IconWifiOff,
-  IconBattery,
-  IconSignalE,
   IconAlertCircle,
-  IconCheck,
   IconX
 } from "@tabler/icons-react"
-import { toast } from "sonner"
 
 export default function AttendanceStatisticsPage() {
   const [statistics, setStatistics] = useState<AttendanceStatistics | null>(null)
@@ -60,24 +56,6 @@ export default function AttendanceStatisticsPage() {
   useEffect(() => {
     loadStatistics()
   }, [])
-
-  const getSyncStatusBadge = (status: string) => {
-    const statusConfig = {
-      'IDLE': { variant: 'secondary' as const, label: 'Idle', icon: IconCheck, className: '' },
-      'SYNCING': { variant: 'default' as const, label: 'Syncing', icon: IconActivity, className: 'bg-blue-100 text-blue-800' },
-      'ERROR': { variant: 'destructive' as const, label: 'Error', icon: IconX, className: '' },
-    }
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.IDLE
-    const Icon = config.icon
-    
-    return (
-      <Badge variant={config.variant} className={config.className || ""}>
-        <Icon className="mr-1 h-3 w-3" />
-        {config.label}
-      </Badge>
-    )
-  }
 
   const getConnectionStatusBadge = (status: string) => {
     const statusConfig = {
@@ -153,7 +131,7 @@ export default function AttendanceStatisticsPage() {
               <IconDeviceDesktop className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.TotalDevices}</div>
+              <div className="text-2xl font-bold">{statistics?.TotalDevices || 0}</div>
               <p className="text-xs text-muted-foreground">
                 Registered devices
               </p>
@@ -166,7 +144,7 @@ export default function AttendanceStatisticsPage() {
               <IconClock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.TotalLogs.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{statistics?.TotalLogs ? formatNumber(statistics.TotalLogs) : '0'}</div>
               <p className="text-xs text-muted-foreground">
                 All time attendance records
               </p>
@@ -179,7 +157,7 @@ export default function AttendanceStatisticsPage() {
               <IconActivity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.TotalSyncLogs}</div>
+              <div className="text-2xl font-bold">{statistics?.TotalSyncLogs || 0}</div>
               <p className="text-xs text-muted-foreground">
                 Total sync operations
               </p>
@@ -192,7 +170,7 @@ export default function AttendanceStatisticsPage() {
               <IconActivity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{(statistics.DatabaseSize / 1024 / 1024).toFixed(1)} MB</div>
+              <div className="text-2xl font-bold">{(statistics?.DatabaseSize ? (statistics.DatabaseSize / 1024 / 1024).toFixed(1) : '0')} MB</div>
               <p className="text-xs text-muted-foreground">
                 Database storage used
               </p>
@@ -212,8 +190,8 @@ export default function AttendanceStatisticsPage() {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Last Sync Time:</span>
                 <span className="text-sm text-muted-foreground">
-                  {statistics.LastSyncTime && statistics.LastSyncTime !== "0001-01-01T00:00:00" ? 
-                    new Date(statistics.LastSyncTime).toLocaleString() :
+                  {statistics?.LastSyncTime && statistics.LastSyncTime !== "0001-01-01T00:00:00" ? 
+                    formatDate(statistics.LastSyncTime) :
                     'Never'
                   }
                 </span>
@@ -221,7 +199,7 @@ export default function AttendanceStatisticsPage() {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Database Size:</span>
                 <span className="text-sm text-muted-foreground">
-                  {(statistics.DatabaseSize / 1024 / 1024).toFixed(2)} MB
+                  {(statistics?.DatabaseSize ? (statistics.DatabaseSize / 1024 / 1024).toFixed(2) : '0')} MB
                 </span>
               </div>
             </div>
@@ -249,14 +227,14 @@ export default function AttendanceStatisticsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {deviceStatuses.map((device) => (
-                <div key={device.deviceId} className="border rounded-lg p-4">
+                <div key={device.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
                       <IconDeviceDesktop className="h-4 w-4 text-gray-400" />
                       <div>
                         <div className="font-medium">{device.deviceName}</div>
                         <div className="text-sm text-muted-foreground">
-                          ID: {device.deviceId}
+                          ID: {device.id}
                         </div>
                       </div>
                     </div>
@@ -271,13 +249,13 @@ export default function AttendanceStatisticsPage() {
                     
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Total Logs:</span>
-                      <span>{device.totalLogs}</span>
+                      <span>{device.logCount}</span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Pending Logs:</span>
-                      <span className={device.pendingLogs > 0 ? "text-orange-600" : "text-green-600"}>
-                        {device.pendingLogs}
+                      <span className={device.userCount > 0 ? "text-orange-600" : "text-green-600"}>
+                        {device.userCount}
                       </span>
                     </div>
                     

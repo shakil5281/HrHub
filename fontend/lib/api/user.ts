@@ -12,7 +12,7 @@ export interface UpdateUserPayload {
 }
 
 export interface User {
-  id: string
+  id: number
   email: string
   firstName: string
   lastName: string
@@ -80,19 +80,19 @@ export const getAllUsers = async (): Promise<UsersResponse> => {
 }
 
 // Get user by ID
-export const getUserById = async (id: string): Promise<SingleUserResponse> => {
+export const getUserById = async (id: number): Promise<SingleUserResponse> => {
   const response = await api.get<SingleUserResponse>(`/User/${id}`)
   return response.data
 }
 
 // Update user
-export const updateUser = async (id: string, payload: UpdateUserPayload): Promise<SingleUserResponse> => {
+export const updateUser = async (id: number, payload: UpdateUserPayload): Promise<SingleUserResponse> => {
   const response = await api.put<SingleUserResponse>(`/User/${id}`, payload)
   return response.data
 }
 
 // Delete user
-export const deleteUser = async (id: string): Promise<DeleteUserResponse> => {
+export const deleteUser = async (id: number): Promise<DeleteUserResponse> => {
   const response = await api.delete<DeleteUserResponse>(`/User/${id}`)
   return response.data
 }
@@ -110,7 +110,7 @@ export const getUsersByDepartment = async (department: string): Promise<UsersRes
 }
 
 // Update user status
-export const updateUserStatus = async (id: string, isActive: boolean): Promise<SingleUserResponse> => {
+export const updateUserStatus = async (id: number, isActive: boolean): Promise<SingleUserResponse> => {
   const response = await api.put<SingleUserResponse>(`/User/${id}/status`, { isActive })
   return response.data
 }
@@ -120,13 +120,13 @@ export interface UpdateUserRolesPayload {
   roles: string[]
 }
 
-export const updateUserRoles = async (id: string, roles: string[]): Promise<SingleUserResponse> => {
+export const updateUserRoles = async (id: number, roles: string[]): Promise<SingleUserResponse> => {
   const response = await api.put<SingleUserResponse>(`/User/${id}/roles`, { roles })
   return response.data
 }
 
 // Permanently delete a user
-export const permanentlyDeleteUser = async (id: string): Promise<DeleteUserResponse> => {
+export const permanentlyDeleteUser = async (id: number): Promise<DeleteUserResponse> => {
   const response = await api.delete<DeleteUserResponse>(`/User/${id}/permanent`)
   return response.data
 }
